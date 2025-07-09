@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🧠 Repo2Doc</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #0e0e0e;
+      color: #00ff90;
+      padding: 40px;
+    }
+
+    h1, h2 {
+      color: #00ffe1;
+    }
+
+    form {
+      background-color: #1a1a1a;
+      padding: 20px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      max-width: 500px;
+      margin-bottom: 30px;
+    }
+
+    input[type="file"] {
+      background-color: #0e0e0e;
+      color: #00ff90;
+      border: 1px solid #444;
+      padding: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: #00ff90;
+      color: #0e0e0e;
+      font-weight: bold;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00c76e;
+    }
+
+    pre {
+      background-color: #111;
+      border: 1px solid #333;
+      padding: 20px;
+      color: #00ff90;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+
+    p.error {
+      color: #ff4b4b;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Repo2Doc: Upload Code</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Select Python or Text File:</label><br>
+    <input type="file" name="code_file" accept=".py,.txt" required><br><br>
+    <button type="submit">🧾 Generate Docs</button>
+  </form>
+
+  {% if documentation %}
+    <h2>📝 Generated Documentation:</h2>
+    <pre>{{ documentation }}</pre>
+  {% endif %}
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+</body>
+</html>
