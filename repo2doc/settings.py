@@ -127,5 +127,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #custom
-AI_MODEL = "qwen"
-AI_MODEL_DEPLOY_TYPE = "transformer"
+AI_MODEL = "llama"
+AI_MODEL_DEPLOY_TYPE = "ollama"
