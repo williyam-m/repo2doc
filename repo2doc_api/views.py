@@ -2,34 +2,55 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import requests
+from django.conf import settings
 
 from ai_model.services.qwen_model import load_qwen_model_from_transformer
-from admin_console.utils import ModelConfig
+from admin_console.utils import *
+from admin_console.api_message_resource import *
 
 class GenerateDocView(APIView):
-    def post(self, request):
-        code = request.data.get('code')
-        if not code:
-            return Response({'error': 'Missing code'}, status=status.HTTP_400_BAD_REQUEST)
 
-        prompt = f"Generate clear and helpful documentation for the following code:\n\n{code}"
+    def post(self, request):
+        code = request.data.get(API_KEY_NAME.CODE)
+        if not code:
+            return Response({API_KEY_NAME.ERROR: ErrorMessages.MISSING_CODE}, status=status.HTTP_400_BAD_REQUEST)
+
+        prompt = AI_PROMPT.getPromptForGenerateDoc(code)
 
         try:
-            if ModelConfig.isQwenFromTransformerEnabled():
-                generator = load_qwen_model_from_transformer()
-                result = generator(prompt, max_new_tokens=300, do_sample=True)[0]['generated_text']
-                return Response({'documentation': result})
+            if ModelConfig.isOllamaEnabled():
 
-            elif ModelConfig.isLlamaFromOllamaEnabled():
+                api_url = settings.OLLAMA_URL + "/api/generate"
                 response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={"model": "llama2:7b", "prompt": prompt, "stream": False}
+                    api_url,
+                    json={
+                        "model": settings.AI_MODEL_NAME,
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {
+                            "temperature": settings.TEMPARATURE,
+                            "max_tokens": settings.MAX_TOKENS
+                        }
+                    }
                 )
                 result = response.json().get("response")
-                return Response({'documentation': result})
+                return Response({
+                    API_KEY_NAME.MESSAGE: SuccessMessages.DOCUMENTATION_GENERATED,
+                    API_KEY_NAME.DOCUMENTATION: result
+                }, status=status.HTTP_200_OK)
+
+            elif ModelConfig.isTransformerEnabled():
+
+                generator = load_qwen_model_from_transformer()
+                result = generator(prompt, max_new_tokens=settings.MAX_TOKENS, do_sample=True)[0]['generated_text']
+                return Response({
+                    API_KEY_NAME.MESSAGE: SuccessMessages.DOCUMENTATION_GENERATED,
+                    API_KEY_NAME.DOCUMENTATION: result
+                }, status=status.HTTP_200_OK)
+
 
             else:
-                return Response({'error': 'No valid model configuration found'}, status=400)
+                return Response({API_KEY_NAME.ERROR: ErrorMessages.INVALID_MODEL_CONFIG}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            return Response({'error': str(e)}, status=500)
+            return Response({API_KEY_NAME.ERROR: str(e) or ErrorMessages.INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

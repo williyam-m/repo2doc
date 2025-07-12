@@ -128,4 +128,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #custom
 AI_MODEL = "llama"
+AI_MODEL_NAME = "llama2:7b"
+
+
 AI_MODEL_DEPLOY_TYPE = "ollama"
+
+
+OLLAMA_URL = "http://localhost:11434"
+HOST_URL = "http://localhost:8000"
+
+TEMPARATURE = 0.2
+MAX_TOKENS = 400  # 2048 (Max safe chunk)
