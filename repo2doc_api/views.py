@@ -5,12 +5,13 @@ import requests
 from django.conf import settings
 
 from ai_model.services.qwen_model import load_qwen_model_from_transformer
-from admin_console.utils import *
+from admin_console.ai_model_config import *
 from admin_console.api_message_resource import *
 
 class GenerateDocView(APIView):
 
     def post(self, request):
+        print("1")
         code = request.data.get(API_KEY_NAME.CODE)
         if not code:
             return Response({API_KEY_NAME.ERROR: ErrorMessages.MISSING_CODE}, status=status.HTTP_400_BAD_REQUEST)

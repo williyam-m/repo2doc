@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
-from admin_console.utils import ModelConfig
+from admin_console.ai_model_config import *
 
 generator = None
 

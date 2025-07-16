@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -124,7 +125,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+MEDIA_DOCS_PATH = os.path.join(BASE_DIR, 'media', 'generated_docs')
 
 #custom
 AI_MODEL = "llama"
@@ -138,4 +139,4 @@ OLLAMA_URL = "http://localhost:11434"
 HOST_URL = "http://localhost:8000"
 
 TEMPARATURE = 0.2
-MAX_TOKENS = 400  # 2048 (Max safe chunk)
+MAX_TOKENS = 50  # 2048 (Max safe chunk)

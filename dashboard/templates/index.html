@@ -69,8 +69,8 @@
   <h1>🧠 Repo2Doc: Upload Code</h1>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <label>Select Python or Text File:</label><br>
-    <input type="file" name="code_file" accept=".py,.txt" required><br><br>
+    <label>Select ZIP File:</label><br>
+    <input type="file" name="code_file" required><br><br>
     <button type="submit">🧾 Generate Docs</button>
   </form>
 
