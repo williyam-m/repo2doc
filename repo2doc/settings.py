@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-mf==+c4u01m2wewq#tt3sbam)nsy(hw&cswax0yw(pdz%--3uu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["williyamm-pf8uqb2c-8000.zcodeusers.in"]
 
 
 # Application definition
@@ -129,7 +129,7 @@ MEDIA_DOCS_PATH = os.path.join(BASE_DIR, 'media', 'generated_docs')
 
 #custom
 AI_MODEL = "llama"
-AI_MODEL_NAME = "llama2:7b"
+AI_MODEL_NAME = "codellama:7b"
 
 
 AI_MODEL_DEPLOY_TYPE = "ollama"

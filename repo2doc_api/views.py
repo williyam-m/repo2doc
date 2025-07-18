@@ -4,14 +4,13 @@ from rest_framework import status
 import requests
 from django.conf import settings
 
-from ai_model.services.qwen_model import load_qwen_model_from_transformer
+#from ai_model.services.qwen_model import load_qwen_model_from_transformer
 from admin_console.ai_model_config import *
 from admin_console.api_message_resource import *
 
 class GenerateDocView(APIView):
 
     def post(self, request):
-        print("1")
         code = request.data.get(API_KEY_NAME.CODE)
         if not code:
             return Response({API_KEY_NAME.ERROR: ErrorMessages.MISSING_CODE}, status=status.HTTP_400_BAD_REQUEST)
@@ -40,6 +39,7 @@ class GenerateDocView(APIView):
                     API_KEY_NAME.DOCUMENTATION: result
                 }, status=status.HTTP_200_OK)
 
+            '''
             elif ModelConfig.isTransformerEnabled():
 
                 generator = load_qwen_model_from_transformer()
@@ -48,10 +48,9 @@ class GenerateDocView(APIView):
                     API_KEY_NAME.MESSAGE: SuccessMessages.DOCUMENTATION_GENERATED,
                     API_KEY_NAME.DOCUMENTATION: result
                 }, status=status.HTTP_200_OK)
+            '''
 
-
-            else:
-                return Response({API_KEY_NAME.ERROR: ErrorMessages.INVALID_MODEL_CONFIG}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({API_KEY_NAME.ERROR: ErrorMessages.INVALID_MODEL_CONFIG}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return Response({API_KEY_NAME.ERROR: str(e) or ErrorMessages.INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

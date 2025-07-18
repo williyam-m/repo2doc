@@ -1,3 +1,4 @@
+'''
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 from admin_console.ai_model_config import *
@@ -19,3 +20,4 @@ def load_qwen_model_from_transformer():
             tokenizer=tokenizer,
         )
     return generator
+'''
