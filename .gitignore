@@ -9,5 +9,5 @@ venv/
 venv
 media/
 .env
-
+.zcode
 .DS_Store

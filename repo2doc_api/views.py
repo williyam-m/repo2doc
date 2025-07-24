@@ -3,10 +3,15 @@ from rest_framework.response import Response
 from rest_framework import status
 import requests
 from django.conf import settings
+import traceback
+from llama_cpp import Llama
 
 #from ai_model.services.qwen_model import load_qwen_model_from_transformer
 from admin_console.ai_model_config import *
 from admin_console.api_message_resource import *
+
+
+llm = Llama(model_path="/home/workspace/llama.cpp/build/models/llama-2-7b.Q4_K_M.gguf")
 
 class GenerateDocView(APIView):
 
@@ -18,8 +23,13 @@ class GenerateDocView(APIView):
         prompt = AI_PROMPT.getPromptForGenerateDoc(code)
 
         try:
-            if ModelConfig.isOllamaEnabled():
+            if ModelConfig.isLlama_2_7b_ModelEnabled():
+                output = llm(prompt, max_tokens=settings.MAX_TOKENS, stop=["</s>"])
+                result = output["choices"][0]["text"]
 
+
+            elif ModelConfig.isOllamaEnabled():
+                
                 api_url = settings.OLLAMA_URL + "/api/generate"
                 response = requests.post(
                     api_url,
@@ -34,23 +44,24 @@ class GenerateDocView(APIView):
                     }
                 )
                 result = response.json().get("response")
-                return Response({
+
+                '''
+                elif ModelConfig.isTransformerEnabled():
+
+                    generator = load_qwen_model_from_transformer()
+                    result = generator(prompt, max_new_tokens=settings.MAX_TOKENS, do_sample=True)[0]['generated_text']
+                '''
+
+
+            else:
+                return Response({API_KEY_NAME.ERROR: ErrorMessages.INVALID_MODEL_CONFIG}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({
                     API_KEY_NAME.MESSAGE: SuccessMessages.DOCUMENTATION_GENERATED,
                     API_KEY_NAME.DOCUMENTATION: result
                 }, status=status.HTTP_200_OK)
-
-            '''
-            elif ModelConfig.isTransformerEnabled():
-
-                generator = load_qwen_model_from_transformer()
-                result = generator(prompt, max_new_tokens=settings.MAX_TOKENS, do_sample=True)[0]['generated_text']
-                return Response({
-                    API_KEY_NAME.MESSAGE: SuccessMessages.DOCUMENTATION_GENERATED,
-                    API_KEY_NAME.DOCUMENTATION: result
-                }, status=status.HTTP_200_OK)
-            '''
-
-            return Response({API_KEY_NAME.ERROR: ErrorMessages.INVALID_MODEL_CONFIG}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
+            traceback.print_exc()
+            print(e)
             return Response({API_KEY_NAME.ERROR: str(e) or ErrorMessages.INTERNAL_SERVER_ERROR}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

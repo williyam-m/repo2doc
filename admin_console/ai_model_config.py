@@ -7,6 +7,11 @@ class AI_PROMPT:
 
 
 class ModelConfig:
+
+    @staticmethod
+    def isLlama_2_7b_ModelEnabled():
+        return settings.AI_MODEL == "llama_2_7b"
+   
     @staticmethod
     def isTransformerEnabled():
         return settings.AI_MODEL_DEPLOY_TYPE == "transformer"
