@@ -3,22 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🧠 Repo2Doc</title>
+  <title>Repo2Doc</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
   <div class="container">
-    <h1>🧠 Repo2Doc</h1>
+    <h1 class="animate-title">Repo2Doc</h1>
     
     <div class="upload-form-container">
       <div class="upload-form">
         <h2 class="form-title">Upload Repository</h2>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="upload-form">
           {% csrf_token %}
-          <div class="file-input-container">
-            <label>Select ZIP File:</label>
-            <input type="file" name="code_file" required>
+          <div class="file-drop-area">
+            <span class="drop-message">Drag and drop or upload your repo (zip)</span>
+            <span class="choose-file">Choose file</span>
+            <input type="file" name="code_file" id="file-input" class="file-input" accept=".zip" required>
+            <div class="file-details" id="file-details"></div>
           </div>
           <button class="submit-button" type="submit">Generate Documentation</button>
         </form>
@@ -47,5 +49,67 @@
       {% endfor %}
     </div>
   </div>
+
+  <script>
+    // Drag and drop file upload functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropArea = document.querySelector('.file-drop-area');
+      const fileInput = document.getElementById('file-input');
+      const fileDetails = document.getElementById('file-details');
+      
+      // Prevent default behavior for drag events
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      // Highlight drop area when dragging file over it
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+        dropArea.classList.add('is-active');
+      }
+      
+      function unhighlight() {
+        dropArea.classList.remove('is-active');
+      }
+      
+      // Handle file drop
+      dropArea.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        updateFileDetails();
+      }
+      
+      // Update file details when file is selected via input
+      fileInput.addEventListener('change', updateFileDetails);
+      
+      function updateFileDetails() {
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          // Format file size
+          const fileSize = (file.size / 1024).toFixed(2) + ' KB';
+          fileDetails.innerHTML = `<strong>${file.name}</strong> (${fileSize})`;
+          fileDetails.classList.add('has-file');
+        } else {
+          fileDetails.innerHTML = '';
+          fileDetails.classList.remove('has-file');
+        }
+      }
+    });
+  </script>
 </body>
 </html>
