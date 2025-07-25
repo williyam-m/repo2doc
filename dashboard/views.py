@@ -80,56 +80,82 @@ def index(request):
 
     return render(request, 'index.html', context)
 
+def build_file_tree(folder_path, base_path=""):
+    """Build a hierarchical file tree structure"""
+    tree = []
+    
+    try:
+        items = os.listdir(os.path.join(folder_path, base_path))
+        items.sort()  # Sort alphabetically
+        
+        # Separate directories and files
+        dirs = []
+        files = []
+        
+        for item in items:
+            full_path = os.path.join(folder_path, base_path, item)
+            rel_path = os.path.join(base_path, item) if base_path else item
+            
+            if os.path.isdir(full_path):
+                dirs.append({
+                    'name': item,
+                    'path': rel_path,
+                    'is_dir': True,
+                    'children': build_file_tree(folder_path, rel_path)
+                })
+            elif item.endswith('.md'):
+                files.append({
+                    'name': item,
+                    'path': rel_path,
+                    'is_dir': False
+                })
+        
+        # Return directories first, then files
+        tree.extend(dirs)
+        tree.extend(files)
+        
+    except (OSError, IOError):
+        pass
+    
+    return tree
+
 def view_doc(request, doc_id):
     # Get the document folder by ID
     doc_folder = get_object_or_404(GeneratedDocFolder, id=doc_id)
     
-    # Generate file tree
-    file_tree = []
+    # Build hierarchical file tree
+    file_tree = build_file_tree(doc_folder.folder_path)
     
-    for root, dirs, files in os.walk(doc_folder.folder_path):
-        rel_path = os.path.relpath(root, doc_folder.folder_path)
-        if rel_path != '.':
-            file_tree.append({
-                'name': os.path.basename(root),
-                'path': os.path.join(rel_path),
-                'is_dir': True
-            })
-        
-        for file in files:
-            if file.endswith('.md'):
-                rel_file_path = os.path.join(rel_path, file)
-                if rel_path == '.':
-                    rel_file_path = file
-                    
-                file_tree.append({
-                    'name': file,
-                    'path': rel_file_path,
-                    'is_dir': False
-                })
+    # Find first file for default display
+    def find_first_file(tree):
+        for item in tree:
+            if not item['is_dir']:
+                return item
+            elif item.get('children'):
+                first_child = find_first_file(item['children'])
+                if first_child:
+                    return first_child
+        return None
     
-    # Sort file tree - directories first, then files
-    file_tree.sort(key=lambda x: (0 if x['is_dir'] else 1, x['name']))
+    first_file = find_first_file(file_tree)
+    current_file_content = ""
+    current_file_name = ""
+    
+    if first_file:
+        try:
+            full_path = os.path.join(doc_folder.folder_path, first_file['path'])
+            with open(full_path, 'r', encoding='utf-8') as f:
+                current_file_content = f.read()
+            current_file_name = first_file['name']
+        except Exception:
+            pass
     
     context = {
         'doc_folder': doc_folder,
-        'file_tree': file_tree,
+        'file_tree_json': json.dumps(file_tree),
+        'current_file_content': current_file_content,
+        'current_file_name': current_file_name,
     }
-    
-    # If a specific file is requested, load its content
-    file_path = request.GET.get('file')
-    if file_path:
-        try:
-            full_path = os.path.join(doc_folder.folder_path, file_path)
-            with open(full_path, 'r', encoding='utf-8') as f:
-                md_content = f.read()
-                
-            # For a real app, you would use a markdown parser here
-            # For simplicity, we're just wrapping in pre tags
-            context['current_file_content'] = f"<pre>{md_content}</pre>"
-            context['current_file_path'] = file_path
-        except Exception as e:
-            context['error'] = f"Error loading file: {str(e)}"
     
     return render(request, 'doc_view.html', context)
 
@@ -146,12 +172,10 @@ def file_content_api(request):
         full_path = os.path.join(doc_folder.folder_path, path)
         
         with open(full_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+            raw_content = f.read()
             
-        # For a real app, convert markdown to HTML here
-        # For simplicity, we're just wrapping in pre tags
         return JsonResponse({
-            'content': f"<pre>{content}</pre>",
+            'raw_content': raw_content,
             'path': path
         })
     except Exception as e:

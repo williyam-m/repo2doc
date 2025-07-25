@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('dashboard.urls')),   
     path('api/repo2doc/', include('repo2doc_api.urls')),
+    path('chat/', include('chat.urls')),
 ]
 
 
