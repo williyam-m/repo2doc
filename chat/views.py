@@ -56,8 +56,9 @@ class ChatAPIView(APIView):
                     ai_response = response.text
                     
                 else:
-                    # Fallback response in case of any error
-                    ai_response = f"I'm sorry, I couldn't process your request. Error: {str(e)}"
+                    # Fallback response if API key is not set
+                    ai_response = "I'm sorry, I couldn't process your request. The AI service is not properly configured (missing API key)."
+                    
             except Exception as e:
                 # Fallback response if Google AI is not configured
                 ai_response = "I'm sorry, I couldn't process your request. The AI service is not properly configured."

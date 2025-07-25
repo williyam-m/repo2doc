@@ -249,21 +249,26 @@ input[type="file"] {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    height: 40px;
+    height: 50px;
     box-sizing: border-box;
     flex-shrink: 0;
+}
+
+.chat-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
 }
 
 .chat-close {
     background: none;
     border: none;
     color: #ffffff;
-    font-size: 18px;
+    font-size: 24px;
     cursor: pointer;
     padding: 0;
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -286,8 +291,19 @@ input[type="file"] {
     border-top: 1px solid #333333;
     background-color: #111111;
     flex-shrink: 0;
-    height: 120px;
+    height: 140px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.current-file-label {
+    font-size: 12px;
+    color: #cccccc;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chat-text-input {
@@ -312,6 +328,7 @@ input[type="file"] {
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    height: 36px;
 }
 
 .chat-send-button:hover:not(:disabled) {

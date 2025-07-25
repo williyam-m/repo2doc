@@ -31,19 +31,20 @@
     </div>
 
     <!-- Chat Container (Right) - Resizable -->
-    <div class="chat-container collapsed" id="chat-container">
+    <div class="chat-container" id="chat-container">
       <div class="chat-toggle" onclick="toggleChat()">
         💬 Chat
       </div>
       <div class="chat-window">
         <div class="chat-header">
-          <span>Ask about: <span id="current-file-name">{{ current_file_name|default:"No file selected" }}</span></span>
+          <div class="chat-icon">💬</div>
           <button class="chat-close" onclick="toggleChat()">×</button>
         </div>
         <div class="chat-messages" id="chat-messages">
           <!-- Messages will be inserted here dynamically -->
         </div>
         <div class="chat-input">
+          <div class="current-file-label">File: <span id="current-file-name">{{ current_file_name|default:"No file selected" }}</span></div>
           <textarea class="chat-text-input" id="chat-input" placeholder="Ask a question about this code..."></textarea>
           <button class="chat-send-button" id="send-button" onclick="sendMessage()" disabled>Send</button>
         </div>
@@ -102,6 +103,23 @@
         childContainer.style.display = 'none';
         toggle.textContent = '▶';
       }
+    }
+
+    // Function to expand folder to specified level
+    function expandFolderToLevel(container, maxLevel, currentLevel = 0) {
+      if (currentLevel >= maxLevel) return;
+      
+      const folderItems = container.querySelectorAll(':scope > .tree-item.folder');
+      folderItems.forEach(folderItem => {
+        const toggle = folderItem.querySelector('.folder-toggle');
+        const childContainer = folderItem.nextElementSibling;
+        
+        if (childContainer && childContainer.style.display === 'none') {
+          childContainer.style.display = 'block';
+          toggle.textContent = '▼';
+          expandFolderToLevel(childContainer, maxLevel, currentLevel + 1);
+        }
+      });
     }
 
     // Function to load file content
@@ -300,6 +318,9 @@
       // Build tree structure
       const treeRoot = document.getElementById('tree-root');
       buildTree(fileTree, treeRoot);
+      
+      // Expand folders to level 3 by default
+      expandFolderToLevel(treeRoot, 3);
       
       // Load first file by default
       const firstFile = findFirstFile(fileTree);
