@@ -1,0 +1,288 @@
+/* style.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: #ffffff;
+    text-align: center;
+}
+
+/* Upload form styling */
+.upload-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 40px 0;
+}
+
+.upload-form {
+    background-color: #111111;
+    padding: 30px;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.file-input-container {
+    margin: 20px 0;
+}
+
+input[type="file"] {
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid #333333;
+    padding: 10px;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.submit-button {
+    background-color: #ffffff;
+    color: #000000;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.submit-button:hover {
+    background-color: #cccccc;
+}
+
+/* Generated docs grid */
+.docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.doc-card {
+    background-color: #111111;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 20px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.doc-card:hover {
+    transform: translateY(-5px);
+    border-color: #ffffff;
+}
+
+.doc-name {
+    font-weight: bold;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.doc-date {
+    font-size: 0.8em;
+    color: #999999;
+}
+
+.doc-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Doc view page layout */
+.doc-view-container {
+    display: flex;
+    height: 100vh;
+}
+
+.folder-tree {
+    width: 25%;
+    background-color: #111111;
+    border-right: 1px solid #333333;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.doc-content {
+    width: 50%;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.chat-sidebar {
+    width: 25%;
+    background-color: #111111;
+    border-left: 1px solid #333333;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Folder tree styling */
+.tree-item {
+    padding: 8px 5px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.tree-item:hover {
+    background-color: #222222;
+}
+
+.tree-item.active {
+    background-color: #333333;
+}
+
+.folder {
+    font-weight: bold;
+}
+
+.file {
+    padding-left: 15px;
+}
+
+/* Chat sidebar styling */
+.chat-input {
+    position: sticky;
+    bottom: 0;
+    padding: 10px 0;
+    background-color: #111111;
+}
+
+.chat-text-input {
+    width: 100%;
+    padding: 10px;
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    resize: none;
+}
+
+.chat-send-button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.chat-messages {
+    margin-bottom: 20px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.user-message {
+    background-color: #222222;
+    text-align: right;
+}
+
+.ai-message {
+    background-color: #333333;
+}
+
+/* Markdown content styling */
+.markdown-content {
+    line-height: 1.6;
+}
+
+.markdown-content pre {
+    background-color: #111111;
+    padding: 15px;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.markdown-content code {
+    background-color: #222222;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+/* Error messages */
+.error-message {
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    border: 1px solid #ff6b6b;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* Success messages */
+.success-message {
+    color: #6bff9e;
+    background-color: rgba(107, 255, 158, 0.1);
+    border: 1px solid #6bff9e;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+    .doc-view-container {
+        flex-direction: column;
+    }
+    
+    .folder-tree, .doc-content, .chat-sidebar {
+        width: 100%;
+        height: auto;
+    }
+    
+    .folder-tree, .chat-sidebar {
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .docs-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    
+    .upload-form {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .docs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+}

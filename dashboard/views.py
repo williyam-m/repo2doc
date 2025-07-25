@@ -1,7 +1,8 @@
-import os, zipfile, tempfile
+import os, zipfile, tempfile, json
 import requests
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.conf import settings
+from django.http import JsonResponse
 from admin_console.api_message_resource import *
 from .models import GeneratedDocFolder
 
@@ -9,6 +10,10 @@ from .models import GeneratedDocFolder
 
 def index(request):
     context = {}
+    
+    # Get all generated doc folders for listing
+    doc_folders = GeneratedDocFolder.objects.all().order_by('-uploaded_at')
+    context['doc_folders'] = doc_folders
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('code_file')
@@ -20,16 +25,19 @@ def index(request):
                     for chunk in uploaded_file.chunks():
                         f.write(chunk)
 
+                # Extract to a subdirectory to avoid processing the original zip
+                extract_dir = os.path.join(temp_zip_dir, 'extracted')
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    zip_ref.extractall(temp_zip_dir)
+                    zip_ref.extractall(extract_dir)
 
                 docs_output_root = os.path.join(settings.MEDIA_DOCS_PATH, os.path.splitext(uploaded_file.name)[0])
                 os.makedirs(docs_output_root, exist_ok=True)
 
-                for root, dirs, files in os.walk(temp_zip_dir):
+                # Walk only the extracted directory, not the temp_zip_dir containing the zip file
+                for root, dirs, files in os.walk(extract_dir):
                     for file in files:
-                        # Skip system/metadata files
-                        if file.startswith('.') or '__MACOSX' in root:
+                        # Skip system/metadata files and zip files
+                        if file.startswith('.') or '__MACOSX' in root or file.endswith('.zip'):
                             continue
 
                         abs_path = os.path.join(root, file)
@@ -52,7 +60,7 @@ def index(request):
                         if res.status_code == 200:
                             documentation = res.json().get(API_KEY_NAME.DOCUMENTATION)
 
-                            rel_path = os.path.relpath(abs_path, temp_zip_dir)
+                            rel_path = os.path.relpath(abs_path, extract_dir)
                             md_path = os.path.join(docs_output_root, os.path.splitext(rel_path)[0] + ".md")
 
                             os.makedirs(os.path.dirname(md_path), exist_ok=True)
@@ -63,7 +71,88 @@ def index(request):
                 GeneratedDocFolder.objects.create(folder_path=docs_output_root)
 
                 context[API_KEY_NAME.MESSAGE] = SuccessMessages.DOCUMENTATION_GENERATED
+                
+                # Get updated list of folders
+                doc_folders = GeneratedDocFolder.objects.all().order_by('-uploaded_at')
+                context['doc_folders'] = doc_folders
         else:
             context[API_KEY_NAME.ERROR] = ErrorMessages.INVALID_FILE_TYPE
 
     return render(request, 'index.html', context)
+
+def view_doc(request, doc_id):
+    # Get the document folder by ID
+    doc_folder = get_object_or_404(GeneratedDocFolder, id=doc_id)
+    
+    # Generate file tree
+    file_tree = []
+    
+    for root, dirs, files in os.walk(doc_folder.folder_path):
+        rel_path = os.path.relpath(root, doc_folder.folder_path)
+        if rel_path != '.':
+            file_tree.append({
+                'name': os.path.basename(root),
+                'path': os.path.join(rel_path),
+                'is_dir': True
+            })
+        
+        for file in files:
+            if file.endswith('.md'):
+                rel_file_path = os.path.join(rel_path, file)
+                if rel_path == '.':
+                    rel_file_path = file
+                    
+                file_tree.append({
+                    'name': file,
+                    'path': rel_file_path,
+                    'is_dir': False
+                })
+    
+    # Sort file tree - directories first, then files
+    file_tree.sort(key=lambda x: (0 if x['is_dir'] else 1, x['name']))
+    
+    context = {
+        'doc_folder': doc_folder,
+        'file_tree': file_tree,
+    }
+    
+    # If a specific file is requested, load its content
+    file_path = request.GET.get('file')
+    if file_path:
+        try:
+            full_path = os.path.join(doc_folder.folder_path, file_path)
+            with open(full_path, 'r', encoding='utf-8') as f:
+                md_content = f.read()
+                
+            # For a real app, you would use a markdown parser here
+            # For simplicity, we're just wrapping in pre tags
+            context['current_file_content'] = f"<pre>{md_content}</pre>"
+            context['current_file_path'] = file_path
+        except Exception as e:
+            context['error'] = f"Error loading file: {str(e)}"
+    
+    return render(request, 'doc_view.html', context)
+
+def file_content_api(request):
+    """API endpoint to get file content"""
+    path = request.GET.get('path')
+    doc_id = request.GET.get('doc_id')
+    
+    if not path or not doc_id:
+        return JsonResponse({'error': 'Missing parameters'}, status=400)
+    
+    try:
+        doc_folder = get_object_or_404(GeneratedDocFolder, id=doc_id)
+        full_path = os.path.join(doc_folder.folder_path, path)
+        
+        with open(full_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        # For a real app, convert markdown to HTML here
+        # For simplicity, we're just wrapping in pre tags
+        return JsonResponse({
+            'content': f"<pre>{content}</pre>",
+            'path': path
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

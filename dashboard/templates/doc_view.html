@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 Repo2Doc - Documentation View</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div class="doc-view-container">
+    <!-- Folder Tree (Left) -->
+    <div class="folder-tree">
+      <h3>Project Structure</h3>
+      <div id="folder-structure">
+        {% for item in file_tree %}
+          {% if item.is_dir %}
+            <div class="tree-item folder" data-path="{{ item.path }}">
+              📁 {{ item.name }}
+            </div>
+          {% else %}
+            <div class="tree-item file" data-path="{{ item.path }}" onclick="loadFile('{{ item.path }}')">
+              📄 {{ item.name }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Documentation Content (Center) -->
+    <div class="doc-content">
+      <h2>{{ doc_folder.folder_name }}</h2>
+      <div id="markdown-content" class="markdown-content">
+        {% if current_file_content %}
+          {{ current_file_content|safe }}
+        {% else %}
+          <p>Select a file from the folder tree to view its documentation.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Chat Sidebar (Right) -->
+    <div class="chat-sidebar">
+      <h3>Ask about this code</h3>
+      <div class="chat-messages" id="chat-messages">
+        <!-- Messages will be inserted here dynamically -->
+      </div>
+      <div class="chat-input">
+        <textarea class="chat-text-input" id="chat-input" placeholder="Ask a question about this code..."></textarea>
+        <button class="chat-send-button" id="send-button" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Function to load file content
+    function loadFile(path) {
+      fetch(`/api/file-content/?path=${encodeURIComponent(path)}`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('markdown-content').innerHTML = data.content;
+          
+          // Update active file in tree
+          document.querySelectorAll('.tree-item').forEach(item => {
+            item.classList.remove('active');
+          });
+          document.querySelector(`.tree-item[data-path="${path}"]`).classList.add('active');
+        })
+        .catch(error => {
+          console.error('Error loading file:', error);
+        });
+    }
+
+    // Function to send chat message
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const message = input.value.trim();
+      
+      if (!message) return;
+      
+      // Clear input
+      input.value = '';
+      
+      // Add user message to chat
+      const chatMessages = document.getElementById('chat-messages');
+      const userMessageDiv = document.createElement('div');
+      userMessageDiv.className = 'message user-message';
+      userMessageDiv.textContent = message;
+      chatMessages.appendChild(userMessageDiv);
+      
+      // Scroll to bottom of chat
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      // Simulate AI response (in a real app, this would be an API call)
+      setTimeout(() => {
+        const aiMessageDiv = document.createElement('div');
+        aiMessageDiv.className = 'message ai-message';
+        aiMessageDiv.textContent = "This is a placeholder response. In a real implementation, this would be a response from the AI about the documentation.";
+        chatMessages.appendChild(aiMessageDiv);
+        
+        // Scroll to bottom of chat again
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 1000);
+    }
+
+    // Initialize: if there's a file path in the URL, load it
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const filePath = urlParams.get('file');
+      
+      if (filePath) {
+        loadFile(filePath);
+      }
+      
+      // Add keyboard shortcut for sending messages
+      document.getElementById('chat-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

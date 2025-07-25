@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -132,8 +136,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_DOCS_PATH = os.path.join(BASE_DIR, 'media', 'generated_docs')
 
 #custom
-AI_MODEL = "llama_2_7b"
-AI_MODEL_NAME = "llama2:7b"
+AI_MODEL = "gemini"
+AI_MODEL_NAME = "gemini-1.5-flash"
 
 
 AI_MODEL_DEPLOY_TYPE = "ollama"
@@ -144,3 +148,10 @@ HOST_URL = "https://williyam-8000.zcodeusers.in"
 
 TEMPARATURE = 0.2
 MAX_TOKENS = 50  # 2048 (Max safe chunk)
+
+
+LLAMA_CPP_PATH = "/home/workspace/llama.cpp/build/models/llama-2-7b.Q4_K_M.gguf"
+
+
+# Google GenAI API Key
+GOOGLE_GENAI_API_KEY = os.getenv('GOOGLE_GENAI_API_KEY', '')
