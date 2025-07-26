@@ -50,9 +50,7 @@ INSTALLED_APPS = [
     'dashboard',
     'repo2doc_api',
     'doc_view',
-    'chat',
-    'ai_transformer',
-    'message_resource',
+    'chat'
 ]
 
 MIDDLEWARE = [

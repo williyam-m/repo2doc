@@ -9,6 +9,7 @@
   <title>Repo2Doc - Documentation View</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/chat_styles.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
@@ -51,6 +52,7 @@
           <div class="current-file-label">Current file: <span id="current-file-name">{{ current_file_name|default:"No file selected" }}</span></div>
           <textarea class="chat-text-input" id="chat-input" placeholder="Ask a question about this code..."></textarea>
           <button class="chat-send-button" id="send-button" onclick="sendMessage()" disabled>Send</button>
+          <div class="chat-bottom-space"></div>
         </div>
       </div>
     </div>
