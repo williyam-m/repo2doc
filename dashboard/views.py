@@ -27,7 +27,7 @@ def index(request):
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(extract_dir)
 
-                docs_output_root = os.path.join(settings.MEDIA_DOCS_PATH, os.path.splitext(uploaded_file.name)[0])
+                docs_output_root = os.path.join(settings.PUBLIC_DOCS_PATH, os.path.splitext(uploaded_file.name)[0])
                 os.makedirs(docs_output_root, exist_ok=True)
 
                 # Walk only the extracted directory, not the temp_zip_dir containing the zip file

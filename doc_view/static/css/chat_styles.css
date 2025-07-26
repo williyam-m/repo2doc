@@ -11,7 +11,7 @@
 }
 
 .current-file-label {
-  font-size: 10px;
+  font-size: 14px;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
@@ -21,8 +21,9 @@
   border-radius: 4px;
   display: block;
   max-width: 100%;
-  margin-top: 0;
+  margin-bottom: 10px;
   border-left: 3px solid #555555;
+  font-weight: 500;
 }
 
 .chat-text-input {

@@ -135,7 +135,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_DOCS_PATH = os.path.join(BASE_DIR, 'media', 'generated_docs')
+PUBLIC_DOCS_PATH = os.path.join(BASE_DIR, 'media', 'generated_docs', 'public_repo')
 
 #custom
 AI_MODEL = "gemini"
