@@ -9,9 +9,9 @@ import traceback
 # import google.generativeai as genai
 
 
-#from ai_model.services.qwen_model import load_qwen_model_from_transformer
-from admin_console.ai_model_config import *
-from admin_console.api_message_resource import *
+#from ai_transformer.services.qwen_model import load_qwen_model_from_transformer
+from message_resource.ai_model_config import *
+from message_resource.api_message_resource import *
 
 
 # Comment out the llama initialization

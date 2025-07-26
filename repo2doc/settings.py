@@ -30,10 +30,10 @@ SECRET_KEY = 'django-insecure-mf==+c4u01m2wewq#tt3sbam)nsy(hw&cswax0yw(pdz%--3uu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["williyam-8000.zcodeusers.in"]
+ALLOWED_HOSTS = ["repo2doc-8000.zcodeusers.in"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://williyam-8000.zcodeusers.in",
+    "https://repo2doc-8000.zcodeusers.in",
 ]
 
 
@@ -143,8 +143,8 @@ AI_MODEL_NAME = "gemini-1.5-flash"
 AI_MODEL_DEPLOY_TYPE = "ollama"
 
 
-OLLAMA_URL = "https://williyam-11434.zcodeusers.in"
-HOST_URL = "https://williyam-8000.zcodeusers.in"
+OLLAMA_URL = "https://repo2doc-11434.zcodeusers.in"
+HOST_URL = "https://repo2doc-8000.zcodeusers.in"
 
 TEMPARATURE = 0.2
 MAX_TOKENS = 50  # 2048 (Max safe chunk)

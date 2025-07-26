@@ -3,7 +3,7 @@ import requests
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
 from django.http import JsonResponse
-from admin_console.api_message_resource import *
+from message_resource.api_message_resource import *
 from .models import GeneratedDocFolder
 
 
