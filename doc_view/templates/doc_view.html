@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Repo2Doc - Documentation View</title>
@@ -125,8 +128,18 @@
 
     // Function to load file content
     function loadFile(path, fileName) {
-      fetch(`/api/file-content/?path=${encodeURIComponent(path)}&doc_id=${docId}`)
-        .then(response => response.json())
+      const apiUrl = `/doc_view/api/file-content/?path=${encodeURIComponent(path)}&doc_id=${docId}`;
+      console.log('Loading file from URL:', apiUrl);
+      
+      // Use absolute URL to avoid path resolution issues
+      const absoluteUrl = new URL(apiUrl, window.location.origin).href;
+      fetch(absoluteUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => {
           // Parse markdown and render as HTML
           const htmlContent = marked.parse(data.raw_content || '');
@@ -312,6 +325,37 @@
         document.body.style.cursor = 'col-resize';
         e.preventDefault();
       });
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Build tree structure
+      const treeRoot = document.getElementById('tree-root');
+      buildTree(fileTree, treeRoot);
+      
+      // Expand folders to level 3 by default
+      expandFolderToLevel(treeRoot, 3);
+      
+      // Load first file by default
+      const firstFile = findFirstFile(fileTree);
+      if (firstFile) {
+        loadFile(firstFile.path, firstFile.name);
+      }
+      
+      // Add keyboard shortcut for sending messages
+      document.getElementById('chat-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // Initialize resizable panels
+      initResizable();
+    });
+  </script>
+</body>
+</html>      });
     }
 
     // Initialize page

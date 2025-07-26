@@ -16,12 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('dashboard.urls')),   
+    path('doc_view/', include('doc_view.urls')),
     path('api/repo2doc/', include('repo2doc_api.urls')),
     path('chat/', include('chat.urls')),
+    
+    # Redirect legacy API calls for backward compatibility
+    path('api/file-content/', RedirectView.as_view(url='/doc_view/api/file-content/', query_string=True), name='legacy_file_content_api'),
 ]
 
 

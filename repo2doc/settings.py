@@ -49,6 +49,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'dashboard',
     'repo2doc_api',
+    'doc_view',
+    'chat',
+    'ai_transformer',
+    'message_resource',
 ]
 
 MIDDLEWARE = [
