@@ -631,8 +631,8 @@ select#organization-select {
 .docs-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 30px;
-    margin-top: 40px;
+    gap: 20px;
+    margin-top: 30px;
     margin-bottom: 30px;
 }
 
@@ -640,12 +640,13 @@ select#organization-select {
     background-color: #111111;
     border: 1px solid #333333;
     border-radius: 8px;
-    padding: 20px;
+    padding: 15px;
     transition: transform 0.3s ease;
     cursor: pointer;
-    height: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
+    margin-bottom: 5px;
 }
 
 .doc-card:hover {
@@ -678,16 +679,17 @@ select#organization-select {
 .repo-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
-    margin: 30px 0;
+    gap: 20px;
+    margin: 25px 0;
 }
 
 .repo-item {
     background-color: #111111;
     border: 1px solid #333333;
     border-radius: 8px;
-    padding: 20px;
+    padding: 15px;
     transition: all 0.3s;
+    margin-bottom: 5px;
 }
 
 .repo-item:hover {
