@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.conf import settings
 from message_resource.api_message_resource import *
 from .models import GeneratedDocFolder
+from django.contrib.auth.models import User
 
 def index(request):
     context = {}
@@ -11,6 +12,16 @@ def index(request):
     # Get all generated doc folders for listing
     doc_folders = GeneratedDocFolder.objects.all().order_by('-uploaded_at')
     context['doc_folders'] = doc_folders
+    
+    # Add user profile data if authenticated
+    if request.user.is_authenticated:
+        try:
+            context['user_profile'] = request.user.profile
+        except User.profile.RelatedObjectDoesNotExist:
+            # Create a profile for existing users that don't have one
+            from users.models import Profile
+            Profile.objects.create(user=request.user)
+            context['user_profile'] = request.user.profile
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('code_file')
@@ -64,8 +75,11 @@ def index(request):
                             with open(md_path, 'w', encoding='utf-8') as doc_file:
                                 doc_file.write(documentation)
 
-                # Save folder path to DB
-                GeneratedDocFolder.objects.create(folder_path=docs_output_root)
+                # Save folder path to DB with user if authenticated
+                if request.user.is_authenticated:
+                    GeneratedDocFolder.objects.create(folder_path=docs_output_root, user=request.user)
+                else:
+                    GeneratedDocFolder.objects.create(folder_path=docs_output_root)
 
                 context[API_KEY_NAME.MESSAGE] = SuccessMessages.DOCUMENTATION_GENERATED
                 

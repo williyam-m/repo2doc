@@ -6,7 +6,10 @@ __pycache__/
 .idea
 
 venv/
+venv_new/
 venv
+db.sqlite3
+
 media/
 .env
 .zcode
