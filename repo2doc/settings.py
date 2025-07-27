@@ -183,6 +183,9 @@ LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+# Pagination settings
+PAGINATION_SIZE = 15
+
 # Enable debugging for social_auth
 LOGGING = {
     'version': 1,

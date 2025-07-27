@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="list-view-container">
+    <h1>{{ title }}</h1>
+    
+    {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% else %}
+    <div class="repos-grid">
+        {% for doc in doc_folders %}
+        <a href="{% url 'view_doc' doc.id %}" class="doc-link">
+            <div class="doc-card">
+                <div class="doc-name">{{ doc.folder_name }}</div>
+                <div class="doc-meta">
+                    <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
+                    {% if doc.organization %}
+                    <div class="doc-org">{{ doc.organization.name }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <div class="empty-message">
+            {% if list_type == 'public' %}
+            <p>No public repositories available.</p>
+            {% elif list_type == 'private' %}
+            <p>No private repositories available.</p>
+            {% elif list_type == 'my' %}
+            <p>You haven't uploaded any repositories yet.</p>
+            {% elif list_type == 'organization' %}
+            <p>No organization repositories available.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if doc_folders.paginator.num_pages > 1 %}
+    <div class="pagination">
+        <span class="pagination-info">
+            Page {{ doc_folders.number }} of {{ doc_folders.paginator.num_pages }}
+        </span>
+        
+        <div class="pagination-controls">
+            {% if doc_folders.has_previous %}
+            <a href="?page=1" class="page-link">&laquo; first</a>
+            <a href="?page={{ doc_folders.previous_page_number }}" class="page-link">&lsaquo; prev</a>
+            {% endif %}
+            
+            <span class="current-page">
+                {{ doc_folders.number }}
+            </span>
+            
+            {% if doc_folders.has_next %}
+            <a href="?page={{ doc_folders.next_page_number }}" class="page-link">next &rsaquo;</a>
+            <a href="?page={{ doc_folders.paginator.num_pages }}" class="page-link">last &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<style>
+    .list-view-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        color: white;
+    }
+    
+    h1 {
+        margin-bottom: 30px;
+        font-size: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 10px;
+    }
+    
+    .repos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .doc-card {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+        padding: 15px;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .doc-card:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-3px);
+    }
+    
+    .doc-link {
+        text-decoration: none;
+        color: white;
+    }
+    
+    .doc-name {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+    
+    .doc-meta {
+        margin-top: auto;
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    
+    .doc-date {
+        margin-bottom: 5px;
+    }
+    
+    .doc-org {
+        background-color: rgba(255, 255, 255, 0.1);
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+    }
+    
+    .error-message {
+        background-color: rgba(255, 0, 0, 0.1);
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .empty-message {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 30px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+    }
+    
+    .pagination-info {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .page-link {
+        color: white;
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: background-color 0.2s;
+    }
+    
+    .page-link:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .current-page {
+        padding: 5px 10px;
+        border-radius: 3px;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .repos-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .pagination {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+{% endblock %}

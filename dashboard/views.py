@@ -2,6 +2,7 @@ import os, zipfile, tempfile
 import requests
 from django.shortcuts import render
 from django.conf import settings
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from message_resource.api_message_resource import *
 from .models import GeneratedDocFolder
 from django.contrib.auth.models import User
@@ -10,23 +11,36 @@ from organization.models import Organization, OrganizationMember
 def index(request):
     context = {}
     
-    # Get public doc folders for listing
-    public_doc_folders = GeneratedDocFolder.objects.filter(visibility='public').order_by('-uploaded_at')
+    # Get public doc folders for listing (limited for index page)
+    public_doc_folders = GeneratedDocFolder.objects.filter(visibility='public').order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
     context['doc_folders'] = public_doc_folders
+    context['public_doc_count'] = GeneratedDocFolder.objects.filter(visibility='public').count()
     
     # Add user profile data and their docs if authenticated
     if request.user.is_authenticated:
         context['user_profile'] = request.user.profile
         
-        # Get user's docs for "My Repos" tab
-        my_doc_folders = GeneratedDocFolder.objects.filter(user=request.user).order_by('-uploaded_at')
+        # Get user's docs for "My Repos" tab (limited for index page)
+        my_doc_folders = GeneratedDocFolder.objects.filter(user=request.user).order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
+        private_doc_folders = GeneratedDocFolder.objects.filter(user=request.user, visibility='private').order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
+        
         context['my_doc_folders'] = my_doc_folders
+        context['private_doc_folders'] = private_doc_folders
+        context['my_doc_count'] = GeneratedDocFolder.objects.filter(user=request.user).count()
+        context['private_doc_count'] = GeneratedDocFolder.objects.filter(user=request.user, visibility='private').count()
         
         # Get organizations for dropdown
         user_orgs = Organization.objects.filter(
             members__user=request.user
         ).distinct()
         context['user_organizations'] = user_orgs
+        
+        # Get organization repos (limited for index page)
+        org_doc_folders = GeneratedDocFolder.objects.filter(
+            organization__in=user_orgs
+        ).order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
+        context['org_doc_folders'] = org_doc_folders
+        context['org_doc_count'] = GeneratedDocFolder.objects.filter(organization__in=user_orgs).count()
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('code_file')

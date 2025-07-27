@@ -10,8 +10,12 @@
             
             {% if is_creator %}
             <div class="organization-id">
-                <p>Organization ID: <span class="unique-id">{{ organization.unique_id }}</span></p>
+                <p>
+                    <button id="copyOrgIdBtn" class="copy-org-id-btn">Copy Org ID</button>
+                    <span id="copyConfirmation" class="copy-confirmation">Copied!</span>
+                </p>
                 <p class="note">Share this ID with team members to join your organization.</p>
+                <input type="hidden" id="orgUniqueId" value="{{ organization.unique_id }}">
             </div>
             {% endif %}
         </div>
@@ -79,11 +83,25 @@
         border-radius: 5px;
     }
     
-    .unique-id {
-        font-family: monospace;
+    .copy-org-id-btn {
         background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: none;
         padding: 5px 10px;
         border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    
+    .copy-org-id-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .copy-confirmation {
+        margin-left: 10px;
+        font-size: 0.8rem;
+        color: #4CAF50;
+        display: none;
     }
     
     .note {
@@ -146,4 +164,27 @@
         }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyBtn = document.getElementById('copyOrgIdBtn');
+        const copyConfirmation = document.getElementById('copyConfirmation');
+        const orgUniqueId = document.getElementById('orgUniqueId');
+        
+        if (copyBtn && orgUniqueId) {
+            copyBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(orgUniqueId.value)
+                    .then(() => {
+                        copyConfirmation.style.display = 'inline';
+                        setTimeout(() => {
+                            copyConfirmation.style.display = 'none';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+            });
+        }
+    });
+</script>
 {% endblock %}

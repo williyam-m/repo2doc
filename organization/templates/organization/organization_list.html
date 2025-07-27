@@ -41,7 +41,7 @@
     </div>
 
     <div class="join-org-section">
-        <h2>Join an Organization</h2>
+        <h2 style="font-size: 1.2rem;">Join an Organization</h2>
         <form method="post" action="{% url 'join_organization' %}" class="join-org-form">
             {% csrf_token %}
             <input type="text" name="unique_id" placeholder="Enter organization ID" required>

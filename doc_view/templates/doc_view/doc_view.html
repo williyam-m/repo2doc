@@ -13,7 +13,7 @@
   <div class="doc-view-container">
     <!-- Folder Tree (Left) - Resizable -->
     <div class="folder-tree" id="folder-tree">
-      <h3>Project Structure</h3>
+      <h3 style="font-size: 1rem;">Project Structure</h3>
       <div id="folder-structure">
         <div id="tree-root"></div>
       </div>
@@ -47,7 +47,9 @@
         </div>
         <div class="chat-input">
           <div class="current-file-label">Current file: <span id="current-file-name">{{ current_file_name|default:"No file selected" }}</span></div>
+          <div class="chat-input-spacing"></div>
           <textarea class="chat-text-input" id="chat-input" placeholder="Ask a question about this code..."></textarea>
+          <div class="chat-input-spacing"></div>
           <button class="chat-send-button" id="send-button" onclick="sendMessage()" disabled>Send</button>
           <div class="chat-bottom-space"></div> <!-- Extra space at the bottom -->
         </div>

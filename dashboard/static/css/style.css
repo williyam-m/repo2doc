@@ -39,7 +39,7 @@ h1, h2, h3 {
     margin: 0;
     position: relative;
     color: #c0c0c0; /* Silver color */
-    font-size: 2rem;
+    font-size: 1rem; /* Decreased from 2rem to 1rem as requested */
     letter-spacing: 2px;
     text-transform: uppercase;
     text-align: left;

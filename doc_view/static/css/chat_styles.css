@@ -10,6 +10,11 @@
   flex-direction: column;
 }
 
+.chat-input-spacing {
+  height: 10px;
+  width: 100%;
+}
+
 .current-file-label {
   font-size: 14px;
   color: #ffffff;

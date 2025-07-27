@@ -81,13 +81,13 @@
     <div class="navigation-boxes">
       <a href="{% url 'organization_list' %}" class="nav-box">
         <div class="nav-box-content">
-          <h3>Organization</h3>
+          <h3 style="font-size: 1rem;">Organization</h3>
           <p>Create or join a team workspace</p>
         </div>
       </a>
       <a href="#" class="nav-box">
         <div class="nav-box-content">
-          <h3>Developer Console</h3>
+          <h3 style="font-size: 1rem;">Developer Console</h3>
           <p>Coming soon</p>
         </div>
       </a>
@@ -98,6 +98,8 @@
     <div class="doc-tabs">
       <button class="tab-btn active" data-tab="public">Public Repos</button>
       <button class="tab-btn" data-tab="my-repos">My Repos</button>
+      <button class="tab-btn" data-tab="private">Private Repos</button>
+      <button class="tab-btn" data-tab="organization">Organization Repos</button>
     </div>
     {% else %}
     <h2>Public Documentation</h2>
@@ -120,6 +122,11 @@
           <p>No public documentation available.</p>
         {% endfor %}
       </div>
+      {% if public_doc_count > doc_folders|length %}
+        <div class="see-more-link">
+          <a href="{% url 'public_repos_list' %}">See all {{ public_doc_count }} public repositories</a>
+        </div>
+      {% endif %}
     </div>
     
     <!-- My Repos Tab (only for authenticated users) -->
@@ -143,6 +150,61 @@
           <p>You haven't created any documentation yet. Upload a repository to get started.</p>
         {% endfor %}
       </div>
+      {% if my_doc_count > my_doc_folders|length %}
+        <div class="see-more-link">
+          <a href="{% url 'my_repos_list' %}">See all {{ my_doc_count }} repositories</a>
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- Private Repos Tab -->
+    <div class="tab-content" id="private-tab">
+      <div class="docs-grid">
+        {% for doc in private_doc_folders %}
+          <a href="{% url 'view_doc' doc.id %}" class="doc-link">
+            <div class="doc-card">
+              <div class="doc-name">{{ doc.folder_name }}</div>
+              <div class="doc-meta">
+                <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
+                <div class="doc-visibility">Private</div>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <p>You don't have any private repositories yet.</p>
+        {% endfor %}
+      </div>
+      {% if private_doc_count > private_doc_folders|length %}
+        <div class="see-more-link">
+          <a href="{% url 'private_repos_list' %}">See all {{ private_doc_count }} private repositories</a>
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- Organization Repos Tab -->
+    <div class="tab-content" id="organization-tab">
+      <div class="docs-grid">
+        {% for doc in org_doc_folders %}
+          <a href="{% url 'view_doc' doc.id %}" class="doc-link">
+            <div class="doc-card">
+              <div class="doc-name">{{ doc.folder_name }}</div>
+              <div class="doc-meta">
+                <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
+                {% if doc.organization %}
+                  <div class="doc-org">{{ doc.organization.name }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <p>No organization repositories available.</p>
+        {% endfor %}
+      </div>
+      {% if org_doc_count > org_doc_folders|length %}
+        <div class="see-more-link">
+          <a href="{% url 'organization_repos_list' %}">See all {{ org_doc_count }} organization repositories</a>
+        </div>
+      {% endif %}
     </div>
     {% endif %}
   </div>
@@ -155,4 +217,47 @@
 
 {% block extra_js %}
 <script src="{% static 'js/index.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons and contents
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Add active class to current button
+        button.classList.add('active');
+        
+        // Show corresponding content
+        const tabId = button.getAttribute('data-tab');
+        document.getElementById(tabId + '-tab').classList.add('active');
+      });
+    });
+  });
+</script>
 {% endblock %}
+
+<style>
+  .see-more-link {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .see-more-link a {
+    display: inline-block;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  
+  .see-more-link a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+</style>
