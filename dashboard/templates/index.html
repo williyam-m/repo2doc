@@ -1,92 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Repo2Doc</title>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  <style>
-    /* Header with user auth */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      padding: 0 10px;
-    }
-    
-    .auth-buttons {
-      display: flex;
-      align-items: center;
-    }
-    
-    .github-login {
-      display: flex;
-      align-items: center;
-      background-color: #24292e;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 14px;
-      transition: background-color 0.3s;
-    }
-    
-    .github-login:hover {
-      background-color: #3a3a3a;
-    }
-    
-    .github-icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 8px;
-    }
-    
-    .user-profile {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-    }
-    
-    .user-avatar {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      margin-right: 10px;
-      border: 2px solid #333;
-    }
-    
-    .user-name {
-      color: white;
-      font-size: 14px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="left-header">
-        <h1 class="animate-title">Repo2Doc</h1>
-      </div>
-      <div class="auth-buttons">
-        {% if user.is_authenticated %}
-          <a href="{% url 'profile' %}" class="user-profile">
-            {% if user.profile.avatar_url %}
-              <img src="{{ user.profile.avatar_url }}" alt="{{ user.username }}" class="user-avatar">
-            {% endif %}
-            <span class="user-name">{{ user.username }}</span>
-          </a>
-        {% else %}
-          <a href="{% url 'social:begin' 'github' %}" class="github-login">
-            <svg class="github-icon" viewBox="0 0 24 24" fill="white">
-              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-            </svg>
-            Sign in
-          </a>
-        {% endif %}
-      </div>
-    </div>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Repo2Doc - Generate Documentation for Your Code{% endblock %}
+
+{% block content %}
+<div class="container">
     
     <div class="upload-form-container">
       <div class="upload-form">
@@ -98,6 +16,39 @@
             <input type="file" name="code_file" id="file-input" class="file-input" accept=".zip" required>
             <div class="file-details" id="file-details"></div>
           </div>
+          
+          {% if user.is_authenticated %}
+          <div class="visibility-options">
+            <label>
+              <input type="radio" name="visibility" value="public" checked>
+              <span class="visibility-label">Public</span>
+              <span class="visibility-desc">Anyone can view</span>
+            </label>
+            
+            <label>
+              <input type="radio" name="visibility" value="private">
+              <span class="visibility-label">Private</span>
+              <span class="visibility-desc">Only you can view</span>
+            </label>
+            
+            {% if user_organizations %}
+            <label>
+              <input type="radio" name="visibility" value="organization">
+              <span class="visibility-label">Organization</span>
+              <span class="visibility-desc">Share with your team</span>
+            </label>
+            
+            <div class="org-select-wrapper" id="org-select-wrapper">
+              <select name="organization_id" id="organization-select">
+                {% for org in user_organizations %}
+                <option value="{{ org.id }}">{{ org.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+          
           <button class="submit-button" type="submit" id="generate-btn">Generate Documentation</button>
         </form>
       </div>
@@ -127,156 +78,81 @@
       <div class="error-message">{{ error }}</div>
     {% endif %}
 
-    <h2>Generated Documentation</h2>
-    <div class="docs-grid">
-      {% for doc in doc_folders %}
-        <a href="{% url 'view_doc' doc.id %}" class="doc-link">
-          <div class="doc-card">
-            <div class="doc-name">{{ doc.folder_name }}</div>
-            <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
-          </div>
-        </a>
-      {% empty %}
-        <p>No documentation generated yet. Upload a repository to get started.</p>
-      {% endfor %}
+    <div class="navigation-boxes">
+      <a href="{% url 'organization_list' %}" class="nav-box">
+        <div class="nav-box-content">
+          <h3>Organization</h3>
+          <p>Create or join a team workspace</p>
+        </div>
+      </a>
+      <a href="#" class="nav-box">
+        <div class="nav-box-content">
+          <h3>Developer Console</h3>
+          <p>Coming soon</p>
+        </div>
+      </a>
     </div>
+    
+    <!-- Tabs for document types -->
+    {% if user.is_authenticated %}
+    <div class="doc-tabs">
+      <button class="tab-btn active" data-tab="public">Public Repos</button>
+      <button class="tab-btn" data-tab="my-repos">My Repos</button>
+    </div>
+    {% else %}
+    <h2>Public Documentation</h2>
+    {% endif %}
+    
+    <!-- Public Repos Tab (default) -->
+    <div class="tab-content active" id="public-tab">
+      <div class="docs-grid">
+        {% for doc in doc_folders %}
+          <a href="{% url 'view_doc' doc.id %}" class="doc-link">
+            <div class="doc-card">
+              <div class="doc-name">{{ doc.folder_name }}</div>
+              <div class="doc-meta">
+                <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
+                <div class="doc-visibility">Public</div>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <p>No public documentation available.</p>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <!-- My Repos Tab (only for authenticated users) -->
+    {% if user.is_authenticated %}
+    <div class="tab-content" id="my-repos-tab">
+      <div class="docs-grid">
+        {% for doc in my_doc_folders %}
+          <a href="{% url 'view_doc' doc.id %}" class="doc-link">
+            <div class="doc-card">
+              <div class="doc-name">{{ doc.folder_name }}</div>
+              <div class="doc-meta">
+                <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
+                <div class="doc-visibility">{{ doc.get_visibility_display }}</div>
+                {% if doc.organization %}
+                  <div class="doc-org">{{ doc.organization.name }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <p>You haven't created any documentation yet. Upload a repository to get started.</p>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 
-  <script>
-    // Drag and drop file upload functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      const dropArea = document.querySelector('.file-drop-area');
-      const fileInput = document.getElementById('file-input');
-      const fileDetails = document.getElementById('file-details');
-      const uploadForm = document.getElementById('upload-form');
-      const generateBtn = document.getElementById('generate-btn');
-      const loadingOverlay = document.getElementById('loading-overlay');
-      const loadingBar = document.getElementById('loading-bar');
-      const loadingPercentage = document.getElementById('loading-percentage');
-      const loadingComplete = document.getElementById('loading-complete');
-      const viewDocLink = document.getElementById('view-doc-link');
-      
-      // Prevent default behavior for drag events
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-      });
-      
-      function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      
-      // Highlight drop area when dragging file over it
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, highlight, false);
-      });
-      
-      ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, unhighlight, false);
-      });
-      
-      function highlight() {
-        dropArea.classList.add('is-active');
-      }
-      
-      function unhighlight() {
-        dropArea.classList.remove('is-active');
-      }
-      
-      // Handle file drop
-      dropArea.addEventListener('drop', handleDrop, false);
-      
-      function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        fileInput.files = files;
-        updateFileDetails();
-      }
-      
-      // Update file details when file is selected via input
-      fileInput.addEventListener('change', updateFileDetails);
-      
-      function updateFileDetails() {
-        if (fileInput.files && fileInput.files[0]) {
-          const file = fileInput.files[0];
-          // Format file size
-          const fileSize = (file.size / 1024).toFixed(2) + ' KB';
-          fileDetails.innerHTML = `<strong>${file.name}</strong> (${fileSize})`;
-          fileDetails.classList.add('has-file');
-        } else {
-          fileDetails.innerHTML = '';
-          fileDetails.classList.remove('has-file');
-        }
-      }
-      
-      // Handle form submission and show loading overlay
-      uploadForm.addEventListener('submit', function(e) {
-        // Only show loading overlay if form is valid
-        if (fileInput.files && fileInput.files[0]) {
-          e.preventDefault();
-          
-          // First submit the form silently
-          const formData = new FormData(uploadForm);
-          
-          // Show loading overlay
-          loadingOverlay.style.display = 'flex';
-          
-          // Simulate loading progress
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += Math.random() * 3;
-            if (progress > 95) progress = 95; // Stop at 95% until completion
-            
-            loadingBar.style.width = progress + '%';
-            loadingPercentage.textContent = Math.round(progress) + '%';
-          }, 200);
-          
-          // Submit the form in the background
-          fetch(uploadForm.action || window.location.href, {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.text())
-          .then(html => {
-            // Parsing completed - set to 100%
-            clearInterval(interval);
-            progress = 100;
-            loadingBar.style.width = '100%';
-            loadingPercentage.textContent = '100%';
-            
-            // Parse the response to get the ID of the generated doc
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const docLinks = doc.querySelectorAll('.doc-link');
-            if (docLinks.length > 0) {
-              const latestDocLink = docLinks[0].getAttribute('href');
-              viewDocLink.setAttribute('href', latestDocLink);
-              
-              // Show completion message with center big banner
-              loadingComplete.style.display = 'block';
-            }
-          })
-          .catch(error => {
-            console.error('Error submitting form:', error);
-            clearInterval(interval);
-            loadingPercentage.textContent = 'Error';
-            // Allow form to submit normally if fetch fails
-            uploadForm.submit();
-          });
-        }
-      });
-      
-      // Show completion message
-      function showCompletionMessage() {
-        // Show completion message with link
-        loadingComplete.style.display = 'block';
-      }
-      
-      // Close overlay when close button is clicked
-      document.getElementById('close-overlay-btn').addEventListener('click', function() {
-        loadingOverlay.style.display = 'none';
-      });
-    });
-  </script>
-</body>
-</html>
+{% if latest_doc_id %}
+  <input type="hidden" id="latest-doc-id" value="{{ latest_doc_id }}">
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}

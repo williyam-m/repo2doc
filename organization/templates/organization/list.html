@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Organizations - Repo2Doc{% endblock %}
+
+{% block content %}
+<div class="container">
+        <a href="{% url 'index' %}" class="back-link">← Back to Home</a>
+        
+        <div class="header">
+            <h1>Organizations</h1>
+            <div class="header-actions">
+                <a href="{% url 'create_organization' %}" class="btn btn-primary">Create Organization</a>
+                <a href="{% url 'join_organization' %}" class="btn btn-secondary">Join Organization</a>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">My Organizations</h2>
+            {% if created_orgs %}
+                <div class="org-grid">
+                    {% for org in created_orgs %}
+                        <div class="org-card">
+                            <div class="org-name">{{ org.name }}</div>
+                            {% if org.description %}
+                                <div class="org-description">{{ org.description }}</div>
+                            {% endif %}
+                            <div class="org-id">ID: {{ org.unique_id }}</div>
+                            <div class="org-meta">Created {{ org.created_at|date:"F j, Y" }}</div>
+                            <div class="org-actions">
+                                <a href="{% url 'organization_detail' org.unique_id %}" class="btn btn-primary">View</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    You haven't created any organizations yet.
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">Joined Organizations</h2>
+            {% if joined_orgs %}
+                <div class="org-grid">
+                    {% for org in joined_orgs %}
+                        <div class="org-card">
+                            <div class="org-name">{{ org.name }}</div>
+                            {% if org.description %}
+                                <div class="org-description">{{ org.description }}</div>
+                            {% endif %}
+                            <div class="org-meta">Created by {{ org.creator.username }} on {{ org.created_at|date:"F j, Y" }}</div>
+                            <div class="org-actions">
+                                <a href="{% url 'organization_detail' org.unique_id %}" class="btn btn-primary">View</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    You haven't joined any organizations yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="organization-detail">
+    <div class="organization-header">
+        <h1>{{ organization.name }}</h1>
+        <div class="organization-meta">
+            <p>{{ organization.description }}</p>
+            
+            {% if is_creator %}
+            <div class="organization-id">
+                <p>Organization ID: <span class="unique-id">{{ organization.unique_id }}</span></p>
+                <p class="note">Share this ID with team members to join your organization.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="organization-content">
+        <div class="org-section">
+            <h2>Repositories</h2>
+            <div class="repos-grid">
+                {% for repo in org_repos %}
+                <a href="{% url 'view_doc' repo.id %}" class="doc-link">
+                    <div class="doc-card">
+                        <div class="doc-name">{{ repo.folder_name }}</div>
+                        <div class="doc-date">{{ repo.uploaded_at|date:"F j, Y" }}</div>
+                    </div>
+                </a>
+                {% empty %}
+                <p>No repositories in this organization yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="org-section">
+            <h2>Members</h2>
+            <div class="members-list">
+                {% for member in members %}
+                <div class="member-card">
+                    <div class="member-info">
+                        <span class="member-name">{{ member.user.username }}</span>
+                        <span class="member-role">{{ member.get_role_display }}</span>
+                    </div>
+                    {% if is_creator and member.user != organization.creator %}
+                    <a href="{% url 'remove_member' organization.unique_id member.user.id %}" class="remove-member">Remove</a>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p>No members in this organization.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .organization-detail {
+        color: white;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .organization-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .organization-meta {
+        margin-top: 10px;
+    }
+    
+    .organization-id {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+    }
+    
+    .unique-id {
+        font-family: monospace;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 5px 10px;
+        border-radius: 3px;
+    }
+    
+    .note {
+        font-size: 0.9em;
+        opacity: 0.7;
+        margin-top: 10px;
+    }
+    
+    .organization-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+    }
+    
+    .org-section {
+        margin-bottom: 30px;
+    }
+    
+    .members-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .member-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+    }
+    
+    .member-role {
+        margin-left: 10px;
+        font-size: 0.9em;
+        opacity: 0.7;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    
+    .remove-member {
+        background-color: rgba(255, 0, 0, 0.2);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    
+    .remove-member:hover {
+        background-color: rgba(255, 0, 0, 0.4);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .organization-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

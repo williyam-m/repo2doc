@@ -25,9 +25,10 @@ urlpatterns = [
     path('api/repo2doc/', include('repo2doc_api.urls')),
     path('chat/', include('chat.urls')),
     path('users/', include('users.urls')),
+    path('organization/', include('organization.urls')),
     
-    # Redirect legacy API calls for backward compatibility
-    path('api/file-content/', RedirectView.as_view(url='/doc_view/api/file-content/', query_string=True), name='legacy_file_content_api'),
+    # API calls should point directly to the view for simplicity
+    path('api/file-content/', include('doc_view.urls_api')),
 ]
 
 

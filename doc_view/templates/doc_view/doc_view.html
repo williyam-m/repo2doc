@@ -127,12 +127,10 @@
 
     // Function to load file content
     function loadFile(path, fileName) {
-      const apiUrl = `/doc_view/api/file-content/?path=${encodeURIComponent(path)}&doc_id=${docId}`;
+      const apiUrl = `/api/file-content/?path=${encodeURIComponent(path)}&doc_id=${docId}`;
       console.log('Loading file from URL:', apiUrl);
       
-      // Use absolute URL to avoid path resolution issues
-      const absoluteUrl = new URL(apiUrl, window.location.origin).href;
-      fetch(absoluteUrl)
+      fetch(apiUrl)
         .then(response => {
           if (!response.ok) {
             throw new Error(`HTTP error ${response.status}`);

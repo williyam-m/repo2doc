@@ -41,8 +41,8 @@
       </div>
       <div class="chat-window">
         <div class="chat-header">
-          <div class="chat-title">Chat</div>
           <div class="chat-icon">💬</div>
+          <div class="chat-title">Chat</div>
           <button class="chat-close" onclick="toggleChat()">×</button>
         </div>
         <div class="chat-messages" id="chat-messages">
@@ -50,11 +50,8 @@
         </div>
         <div class="chat-input">
           <div class="current-file-label">Current file: <span id="current-file-name">{{ current_file_name|default:"No file selected" }}</span></div>
-          <div style="margin-top: 10px;"></div>
           <textarea class="chat-text-input" id="chat-input" placeholder="Ask a question about this code..."></textarea>
-          <div style="margin-top: 10px;"></div>
           <button class="chat-send-button" id="send-button" onclick="sendMessage()" disabled>Send</button>
-          <div style="height: 10px;"></div>
         </div>
       </div>
     </div>

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="org-header">
+        <h1>{{ organization.name }}</h1>
+        <a href="{% url 'organization_list' %}" class="back-btn">Back to Organizations</a>
+    </div>
+
+    <div class="org-details">
+        {% if organization.description %}
+        <div class="org-description">
+            <h3>Description</h3>
+            <p>{{ organization.description }}</p>
+        </div>
+        {% endif %}
+
+        {% if is_admin %}
+        <div class="org-id-section">
+            <h3>Organization ID</h3>
+            <p class="org-id">{{ organization.unique_id }}</p>
+            <p class="org-id-help">Share this ID with team members to let them join this organization.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="org-docs">
+        <h2>Organization Repositories</h2>
+        <div class="docs-grid">
+            {% for doc in organization_docs %}
+            <a href="{% url 'view_doc' doc.id %}" class="doc-link">
+                <div class="doc-card">
+                    <div class="doc-name">{{ doc.folder_name }}</div>
+                    <div class="doc-meta">
+                        <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
+                        <div class="doc-user">By: {{ doc.user.username }}</div>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <p>No repositories have been added to this organization yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="org-members">
+        <h2>Members</h2>
+        <div class="members-list">
+            {% for member in members %}
+            <div class="member-item">
+                <div class="member-info">
+                    {% if member.user.profile.avatar_url %}
+                    <img src="{{ member.user.profile.avatar_url }}" alt="{{ member.user.username }}" class="member-avatar">
+                    {% endif %}
+                    <span class="member-name">{{ member.user.username }}</span>
+                    <span class="member-role">{{ member.get_role_display }}</span>
+                    <span class="member-date">Joined: {{ member.joined_at|date:"F j, Y" }}</span>
+                </div>
+                
+                {% if is_admin and member.user != request.user %}
+                <form method="post" action="{% url 'remove_member' organization.unique_id member.user.id %}" class="remove-member-form">
+                    {% csrf_token %}
+                    <button type="submit" class="remove-member-btn">Remove</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if is_admin %}
+    <div class="org-danger-zone">
+        <h2>Danger Zone</h2>
+        <form method="post" action="{% url 'delete_organization' organization.unique_id %}" class="delete-org-form">
+            {% csrf_token %}
+            <button type="submit" class="delete-org-btn" onclick="return confirm('Are you sure you want to delete this organization? This action cannot be undone.');">Delete Organization</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

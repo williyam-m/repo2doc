@@ -4,36 +4,30 @@ logger = logging.getLogger(__name__)
 
 def save_profile(backend, user, response, *args, **kwargs):
     """
-    Custom pipeline function to save GitHub profile information
+    Custom pipeline function to save GitHub profile information.
+    This is called only once during the OAuth flow.
     """
-    logger.debug(f"Processing save_profile for {user.username}")
-    logger.debug(f"Response from GitHub: {response}")
-    
     if backend.name == 'github':
         from users.models import Profile
         
-        # Log the entire response to diagnose what's available
-        logger.debug(f"GitHub response keys: {response.keys()}")
+        logger.info(f"Saving GitHub profile for {user.username}")
         
         try:
+            # Get or create the profile in a single database operation
             profile, created = Profile.objects.get_or_create(user=user)
             
-            # GitHub API returns 'id', 'login' and 'avatar_url'
-            profile.github_id = str(response.get('id', ''))
-            profile.github_username = response.get('login', '')
-            profile.avatar_url = response.get('avatar_url', '')
-            
-            # Debug log to see what values we're setting
-            logger.debug(f"Setting profile data: github_id={profile.github_id}, "
-                        f"github_username={profile.github_username}, "
-                        f"avatar_url={profile.avatar_url}")
-            
-            profile.save()
-            
-            # Verify after save
-            logger.debug(f"Profile {'created' if created else 'updated'} for user {user.username}")
-            logger.debug(f"Saved profile values: github_id={profile.github_id}, "
-                        f"github_username={profile.github_username}, "
-                        f"avatar_url={profile.avatar_url}")
+            # Only update if the GitHub data is available and profile doesn't have it yet
+            if not profile.github_username or not profile.avatar_url:
+                # GitHub API returns 'id', 'login' and 'avatar_url'
+                profile.github_id = str(response.get('id', ''))
+                profile.github_username = response.get('login', '')
+                profile.avatar_url = response.get('avatar_url', '')
+                profile.save()
+                
+                logger.info(f"Profile data saved: username={profile.github_username}, " 
+                           f"has_avatar={'Yes' if profile.avatar_url else 'No'}")
+            else:
+                logger.info(f"Profile data already exists for {user.username}, skipping update")
+                
         except Exception as e:
             logger.error(f"Error saving profile for {user.username}: {e}")

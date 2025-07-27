@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'repo2doc_api',
     'doc_view',
     'chat',
-    'users'
+    'users',
+    'organization'
 ]
 
 MIDDLEWARE = [
