@@ -19,9 +19,53 @@
         {% if is_admin %}
         <div class="org-id-section">
             <h3>Organization ID</h3>
-            <p class="org-id">{{ organization.unique_id }}</p>
+            <button id="copy-org-id" class="copy-org-id-btn" data-org-id="{{ organization.unique_id }}">Copy Org ID</button>
             <p class="org-id-help">Share this ID with team members to let them join this organization.</p>
+            <span id="copy-confirmation" class="copy-confirmation">Copied!</span>
         </div>
+        <script>
+            document.getElementById('copy-org-id').addEventListener('click', function() {
+                const orgId = this.getAttribute('data-org-id');
+                navigator.clipboard.writeText(orgId).then(function() {
+                    const confirmation = document.getElementById('copy-confirmation');
+                    confirmation.style.display = 'inline-block';
+                    setTimeout(function() {
+                        confirmation.style.display = 'none';
+                    }, 2000);
+                });
+            });
+        </script>
+        <style>
+            .copy-org-id-btn {
+                background-color: #333;
+                color: #fff;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 0.8em;
+                transition: all 0.3s;
+            }
+            
+            .copy-org-id-btn:hover {
+                background-color: #444;
+            }
+            
+            .copy-confirmation {
+                display: none;
+                margin-left: 10px;
+                color: #6bff9e;
+                font-size: 0.9em;
+                animation: fadeInOut 2s;
+            }
+            
+            @keyframes fadeInOut {
+                0% { opacity: 0; }
+                20% { opacity: 1; }
+                80% { opacity: 1; }
+                100% { opacity: 0; }
+            }
+        </style>
         {% endif %}
     </div>
 

@@ -10,11 +10,26 @@
       <div class="upload-form">
         <form method="post" enctype="multipart/form-data" id="upload-form">
           {% csrf_token %}
-          <div class="file-drop-area">
-            <span class="drop-message">Drag and drop or upload your repo (zip)</span>
-            <span class="choose-file">Choose file</span>
-            <input type="file" name="code_file" id="file-input" class="file-input" accept=".zip" required>
-            <div class="file-details" id="file-details"></div>
+          <div class="input-options-container">
+            <div class="input-option">
+              <div class="file-drop-area">
+                <span class="drop-message">Drag and drop or upload your repo (zip)</span>
+                <span class="choose-file">Choose file</span>
+                <input type="file" name="code_file" id="file-input" class="file-input" accept=".zip">
+                <div class="file-details" id="file-details"></div>
+              </div>
+            </div>
+            
+            <div class="input-option-divider">
+              <span>OR</span>
+            </div>
+            
+            <div class="input-option">
+              <div class="github-url-container">
+                <span class="github-url-label">Enter GitHub Repository URL</span>
+                <input type="text" name="github_url" id="github-url" placeholder="https://github.com/username/repository" class="github-url-input">
+              </div>
+            </div>
           </div>
           
           {% if user.is_authenticated %}
@@ -124,7 +139,7 @@
       </div>
       {% if public_doc_count > doc_folders|length %}
         <div class="see-more-link">
-          <a href="{% url 'public_repos_list' %}">See all {{ public_doc_count }} public repositories</a>
+          <a href="{% url 'public_repos_list' %}" class="white-button">See all {{ public_doc_count }} public repositories</a>
         </div>
       {% endif %}
     </div>
@@ -152,7 +167,7 @@
       </div>
       {% if my_doc_count > my_doc_folders|length %}
         <div class="see-more-link">
-          <a href="{% url 'my_repos_list' %}">See all {{ my_doc_count }} repositories</a>
+          <a href="{% url 'my_repos_list' %}" class="white-button">See all {{ my_doc_count }} repositories</a>
         </div>
       {% endif %}
     </div>
@@ -176,7 +191,7 @@
       </div>
       {% if private_doc_count > private_doc_folders|length %}
         <div class="see-more-link">
-          <a href="{% url 'private_repos_list' %}">See all {{ private_doc_count }} private repositories</a>
+          <a href="{% url 'private_repos_list' %}" class="white-button">See all {{ private_doc_count }} private repositories</a>
         </div>
       {% endif %}
     </div>
@@ -202,7 +217,7 @@
       </div>
       {% if org_doc_count > org_doc_folders|length %}
         <div class="see-more-link">
-          <a href="{% url 'organization_repos_list' %}">See all {{ org_doc_count }} organization repositories</a>
+          <a href="{% url 'organization_repos_list' %}" class="white-button">See all {{ org_doc_count }} organization repositories</a>
         </div>
       {% endif %}
     </div>
@@ -247,17 +262,18 @@
     margin-top: 20px;
   }
   
-  .see-more-link a {
+  .see-more-link a.white-button {
     display: inline-block;
-    color: white;
-    background-color: rgba(255, 255, 255, 0.1);
+    color: #000;
+    background-color: #ffffff;
     padding: 8px 16px;
     border-radius: 4px;
     text-decoration: none;
     transition: background-color 0.2s;
+    font-weight: bold;
   }
   
-  .see-more-link a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+  .see-more-link a.white-button:hover {
+    background-color: #cccccc;
   }
 </style>

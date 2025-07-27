@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const loadingPercentage = document.getElementById('loading-percentage');
   const loadingComplete = document.getElementById('loading-complete');
   const viewDocLink = document.getElementById('view-doc-link');
+  const githubUrlInput = document.getElementById('github-url');
   
   // Tab functionality
   const tabButtons = document.querySelectorAll('.tab-btn');
@@ -95,16 +96,43 @@ document.addEventListener('DOMContentLoaded', function() {
       const fileSize = (file.size / 1024).toFixed(2) + ' KB';
       fileDetails.innerHTML = `<strong>${file.name}</strong> (${fileSize})`;
       fileDetails.classList.add('has-file');
+      
+      // Clear GitHub URL input when file is selected
+      if (githubUrlInput) {
+        githubUrlInput.value = '';
+      }
     } else {
       fileDetails.innerHTML = '';
       fileDetails.classList.remove('has-file');
     }
   }
   
+  // Clear file input when GitHub URL is entered
+  if (githubUrlInput) {
+    githubUrlInput.addEventListener('input', function() {
+      if (this.value.trim() !== '') {
+        // Clear file input and details
+        fileInput.value = '';
+        fileDetails.innerHTML = '';
+        fileDetails.classList.remove('has-file');
+      }
+    });
+  }
+  
+  // Clear GitHub URL input when file is selected
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files && fileInput.files[0] && githubUrlInput) {
+      githubUrlInput.value = '';
+    }
+  });
+  
   // Handle form submission and show loading overlay
   uploadForm.addEventListener('submit', function(e) {
-    // Only show loading overlay if form is valid
-    if (fileInput.files && fileInput.files[0]) {
+    // Check if either file is selected or GitHub URL is provided
+    const hasFile = fileInput.files && fileInput.files[0];
+    const hasGithubUrl = githubUrlInput && githubUrlInput.value.trim() !== '';
+    
+    if (hasFile || hasGithubUrl) {
       e.preventDefault();
       
       // First submit the form silently

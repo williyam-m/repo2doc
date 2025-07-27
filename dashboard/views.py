@@ -44,6 +44,7 @@ def index(request):
 
     if request.method == 'POST':
         uploaded_file = request.FILES.get('code_file')
+        github_url = request.POST.get('github_url', '').strip()
         visibility = request.POST.get('visibility', 'public')
         organization_id = request.POST.get('organization_id') if visibility == 'organization' else None
         
@@ -58,84 +59,146 @@ def index(request):
         else:
             organization = None
 
-        if uploaded_file and zipfile.is_zipfile(uploaded_file):
+        # Initialize organization to None
+        if organization_id:
+            try:
+                organization = Organization.objects.get(id=organization_id)
+                # Verify user is a member of this organization
+                if not OrganizationMember.objects.filter(organization=organization, user=request.user).exists():
+                    organization = None
+            except Organization.DoesNotExist:
+                organization = None
+        else:
+            organization = None
+
+        # Process GitHub URL if provided
+        if github_url and github_url.startswith(('https://github.com/', 'http://github.com/')):
+            try:
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    # Extract owner and repo from URL
+                    # Format: https://github.com/owner/repo
+                    parts = github_url.rstrip('/').split('/')
+                    if len(parts) >= 5:  # Protocol + empty + github.com + owner + repo
+                        owner = parts[-2]
+                        repo = parts[-1]
+                        
+                        # Construct API URL to get the zip archive
+                        zip_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/main.zip"
+                        
+                        # Try to download the ZIP file
+                        response = requests.get(zip_url, stream=True)
+                        if response.status_code == 404:
+                            # Try master branch if main doesn't exist
+                            zip_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/master.zip"
+                            response = requests.get(zip_url, stream=True)
+                            
+                        if response.status_code == 200:
+                            # Save zip file
+                            zip_path = os.path.join(temp_dir, f"{repo}.zip")
+                            with open(zip_path, 'wb') as f:
+                                for chunk in response.iter_content(chunk_size=8192):
+                                    f.write(chunk)
+                                    
+                            # Continue with zip file processing
+                            return process_zip_file(request, zip_path, visibility, organization, context)
+                        else:
+                            context[API_KEY_NAME.ERROR] = f"Failed to download repository: HTTP {response.status_code}"
+                    else:
+                        context[API_KEY_NAME.ERROR] = "Invalid GitHub repository URL format"
+            except Exception as e:
+                context[API_KEY_NAME.ERROR] = f"Error processing GitHub URL: {str(e)}"
+                
+        # Process uploaded ZIP file
+        elif uploaded_file and zipfile.is_zipfile(uploaded_file):
             with tempfile.TemporaryDirectory() as temp_zip_dir:
                 zip_path = os.path.join(temp_zip_dir, uploaded_file.name)
                 with open(zip_path, 'wb') as f:
                     for chunk in uploaded_file.chunks():
                         f.write(chunk)
-
-                # Extract to a subdirectory to avoid processing the original zip
-                extract_dir = os.path.join(temp_zip_dir, 'extracted')
-                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    zip_ref.extractall(extract_dir)
-
-                docs_output_root = os.path.join(settings.PUBLIC_DOCS_PATH, os.path.splitext(uploaded_file.name)[0])
-                os.makedirs(docs_output_root, exist_ok=True)
-
-                # Walk only the extracted directory, not the temp_zip_dir containing the zip file
-                for root, dirs, files in os.walk(extract_dir):
-                    for file in files:
-                        # Skip system/metadata files and zip files
-                        if file.startswith('.') or '__MACOSX' in root or file.endswith('.zip'):
-                            continue
-
-                        abs_path = os.path.join(root, file)
-                        if not os.path.isfile(abs_path):
-                            continue
-
-                        try:
-                            with open(abs_path, 'r', encoding='utf-8', errors='ignore') as source_file:
-                                code = source_file.read()
-                        except Exception:
-                            continue  # skip binary/non-readable
-
-                        if not code.strip():  # skip empty files
-                            continue
-
-                        # Send to model
-                        api_url = settings.HOST_URL + "/api/repo2doc/"
-                        res = requests.post(api_url, json={API_KEY_NAME.CODE: code})
-
-                        if res.status_code == 200:
-                            documentation = res.json().get(API_KEY_NAME.DOCUMENTATION)
-
-                            rel_path = os.path.relpath(abs_path, extract_dir)
-                            md_path = os.path.join(docs_output_root, os.path.splitext(rel_path)[0] + ".md")
-
-                            os.makedirs(os.path.dirname(md_path), exist_ok=True)
-                            with open(md_path, 'w', encoding='utf-8') as doc_file:
-                                doc_file.write(documentation)
-
-                # Save folder path to DB with user if authenticated
-                if request.user.is_authenticated:
-                    GeneratedDocFolder.objects.create(
-                        folder_path=docs_output_root, 
-                        user=request.user,
-                        visibility=visibility,
-                        organization=organization
-                    )
-                else:
-                    # Anonymous users can only create public docs
-                    GeneratedDocFolder.objects.create(
-                        folder_path=docs_output_root,
-                        visibility='public'
-                    )
-
-                context[API_KEY_NAME.MESSAGE] = SuccessMessages.DOCUMENTATION_GENERATED
                 
-                # Get updated list of folders
-                if request.user.is_authenticated:
-                    my_doc_folders = GeneratedDocFolder.objects.filter(user=request.user).order_by('-uploaded_at')
-                    context['my_doc_folders'] = my_doc_folders
-                
-                public_doc_folders = GeneratedDocFolder.objects.filter(visibility='public').order_by('-uploaded_at')
-                context['doc_folders'] = public_doc_folders
-                
-                # Store the ID of the newly created doc for the view link
-                latest_doc = GeneratedDocFolder.objects.filter(folder_path=docs_output_root).latest('uploaded_at')
-                context['latest_doc_id'] = latest_doc.id
+                return process_zip_file(request, zip_path, visibility, organization, context)
         else:
             context[API_KEY_NAME.ERROR] = ErrorMessages.INVALID_FILE_TYPE
 
+    return render(request, 'index.html', context)
+    
+def process_zip_file(request, zip_path, visibility, organization, context):
+    """Process the zip file and generate documentation"""
+    with tempfile.TemporaryDirectory() as temp_dir:
+
+                # Extract filename from the zip path
+        zip_filename = os.path.basename(zip_path)
+        zip_name = os.path.splitext(zip_filename)[0]
+        
+        # Extract to a subdirectory to avoid processing the original zip
+        extract_dir = os.path.join(temp_dir, 'extracted')
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+
+        docs_output_root = os.path.join(settings.PUBLIC_DOCS_PATH, zip_name)
+        os.makedirs(docs_output_root, exist_ok=True)
+
+        # Walk only the extracted directory, not the temp directory containing the zip file
+        for root, dirs, files in os.walk(extract_dir):
+            for file in files:
+                # Skip system/metadata files and zip files
+                if file.startswith('.') or '__MACOSX' in root or file.endswith('.zip'):
+                    continue
+
+                abs_path = os.path.join(root, file)
+                if not os.path.isfile(abs_path):
+                    continue
+
+                try:
+                    with open(abs_path, 'r', encoding='utf-8', errors='ignore') as source_file:
+                        code = source_file.read()
+                except Exception:
+                    continue  # skip binary/non-readable
+
+                if not code.strip():  # skip empty files
+                    continue
+
+                # Send to model
+                api_url = settings.HOST_URL + "/api/repo2doc/"
+                res = requests.post(api_url, json={API_KEY_NAME.CODE: code})
+
+                if res.status_code == 200:
+                    documentation = res.json().get(API_KEY_NAME.DOCUMENTATION)
+
+                    rel_path = os.path.relpath(abs_path, extract_dir)
+                    md_path = os.path.join(docs_output_root, os.path.splitext(rel_path)[0] + ".md")
+
+                    os.makedirs(os.path.dirname(md_path), exist_ok=True)
+                    with open(md_path, 'w', encoding='utf-8') as doc_file:
+                        doc_file.write(documentation)
+
+        # Save folder path to DB with user if authenticated
+        if request.user.is_authenticated:
+            GeneratedDocFolder.objects.create(
+                folder_path=docs_output_root, 
+                user=request.user,
+                visibility=visibility,
+                organization=organization
+            )
+        else:
+            # Anonymous users can only create public docs
+            GeneratedDocFolder.objects.create(
+                folder_path=docs_output_root,
+                visibility='public'
+            )
+
+        context[API_KEY_NAME.MESSAGE] = SuccessMessages.DOCUMENTATION_GENERATED
+        
+        # Get updated list of folders
+        if request.user.is_authenticated:
+            my_doc_folders = GeneratedDocFolder.objects.filter(user=request.user).order_by('-uploaded_at')
+            context['my_doc_folders'] = my_doc_folders
+        
+        public_doc_folders = GeneratedDocFolder.objects.filter(visibility='public').order_by('-uploaded_at')
+        context['doc_folders'] = public_doc_folders
+        
+        # Store the ID of the newly created doc for the view link
+        latest_doc = GeneratedDocFolder.objects.filter(folder_path=docs_output_root).latest('uploaded_at')
+        context['latest_doc_id'] = latest_doc.id
+        
     return render(request, 'index.html', context)
