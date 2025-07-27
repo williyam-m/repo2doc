@@ -66,7 +66,9 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1 class="animate-title">Repo2Doc</h1>
+      <div class="left-header">
+        <h1 class="animate-title">Repo2Doc</h1>
+      </div>
       <div class="auth-buttons">
         {% if user.is_authenticated %}
           <a href="{% url 'profile' %}" class="user-profile">
@@ -104,15 +106,15 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loading-overlay">
       <div class="loading-content">
+        <button class="close-btn" id="close-overlay-btn">×</button>
         <div class="loading-bar-container">
           <div class="loading-bar" id="loading-bar"></div>
         </div>
-        <div class="loading-quote">"To build anything that truly lasts, it takes time"</div>
         <div class="loading-percentage" id="loading-percentage">0%</div>
+        <div class="loading-quote">"To build anything that truly lasts, it takes time"</div>
         <div class="loading-complete" id="loading-complete">
           <h3>Documentation Ready!</h3>
           <a href="#" class="view-link" id="view-doc-link">View Documentation</a>
-          <button class="close-btn" id="close-overlay-btn">×</button>
         </div>
       </div>
     </div>
@@ -213,50 +215,54 @@
         if (fileInput.files && fileInput.files[0]) {
           e.preventDefault();
           
+          // First submit the form silently
+          const formData = new FormData(uploadForm);
+          
           // Show loading overlay
           loadingOverlay.style.display = 'flex';
           
           // Simulate loading progress
           let progress = 0;
           const interval = setInterval(() => {
-            progress += Math.random() * 5;
-            if (progress > 100) progress = 100;
+            progress += Math.random() * 3;
+            if (progress > 95) progress = 95; // Stop at 95% until completion
             
             loadingBar.style.width = progress + '%';
             loadingPercentage.textContent = Math.round(progress) + '%';
-            
-            if (progress === 100) {
-              clearInterval(interval);
-              // Show completion message
-              showCompletionMessage();
-              
-              // Submit the form in the background
-              const formData = new FormData(uploadForm);
-              fetch(uploadForm.action || window.location.href, {
-                method: 'POST',
-                body: formData
-              })
-              .then(response => response.text())
-              .then(html => {
-                // Parse the response to get the ID of the generated doc
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const docLinks = doc.querySelectorAll('.doc-link');
-                if (docLinks.length > 0) {
-                  const latestDocLink = docLinks[0].getAttribute('href');
-                  viewDocLink.setAttribute('href', latestDocLink);
-                  
-                  // Show completion message with link
-                  loadingComplete.style.display = 'block';
-                }
-              })
-              .catch(error => {
-                console.error('Error submitting form:', error);
-                // Allow form to submit normally if fetch fails
-                uploadForm.submit();
-              });
-            }
           }, 200);
+          
+          // Submit the form in the background
+          fetch(uploadForm.action || window.location.href, {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.text())
+          .then(html => {
+            // Parsing completed - set to 100%
+            clearInterval(interval);
+            progress = 100;
+            loadingBar.style.width = '100%';
+            loadingPercentage.textContent = '100%';
+            
+            // Parse the response to get the ID of the generated doc
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const docLinks = doc.querySelectorAll('.doc-link');
+            if (docLinks.length > 0) {
+              const latestDocLink = docLinks[0].getAttribute('href');
+              viewDocLink.setAttribute('href', latestDocLink);
+              
+              // Show completion message with center big banner
+              loadingComplete.style.display = 'block';
+            }
+          })
+          .catch(error => {
+            console.error('Error submitting form:', error);
+            clearInterval(interval);
+            loadingPercentage.textContent = 'Error';
+            // Allow form to submit normally if fetch fails
+            uploadForm.submit();
+          });
         }
       });
       
