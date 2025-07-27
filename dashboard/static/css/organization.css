@@ -222,14 +222,27 @@
     font-size: 1.1em;
 }
 
-.org-id {
-    font-family: monospace;
-    background-color: #000;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #333;
-    font-size: 1.2em;
-    letter-spacing: 1px;
+.org-id-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.copy-org-id-btn {
+    display: inline-block;
+    background-color: #222;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #444;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: all 0.3s;
+}
+
+.copy-org-id-btn:hover {
+    background-color: #333;
+    border-color: #555;
 }
 
 .org-id-help {
