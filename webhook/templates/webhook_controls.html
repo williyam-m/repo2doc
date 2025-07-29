@@ -1,0 +1,379 @@
+<!-- Webhook Controls for GitHub repositories -->
+<div id="webhook-controls" class="webhook-section" style="display: none;">
+    <div class="webhook-header">
+        <h3>Auto Sync Settings</h3>
+        <div class="webhook-status">
+            <span id="webhook-status-indicator" class="status-indicator"></span>
+            <span id="webhook-status-text">Loading...</span>
+        </div>
+    </div>
+    
+    <div class="webhook-content">
+        <div id="github-repo-info" class="repo-info" style="display: none;">
+            <p><strong>Repository:</strong> <span id="repo-url"></span></p>
+            <p><strong>Last Sync:</strong> <span id="last-sync">Never</span></p>
+            <div id="sync-errors" class="error-info" style="display: none;">
+                <p><strong>Sync Failures:</strong> <span id="failure-count">0</span></p>
+                <p><strong>Last Error:</strong> <span id="last-error"></span></p>
+            </div>
+        </div>
+        
+        <div class="webhook-actions">
+            <div id="webhook-setup" style="display: none;">
+                <p>Enable automatic documentation updates when you push changes to your GitHub repository.</p>
+                <div class="github-token-input">
+                    <label for="github-token">GitHub Personal Access Token:</label>
+                    <input type="password" id="github-token" placeholder="Enter your GitHub token">
+                    <small>Required to create webhook. <a href="https://github.com/settings/tokens" target="_blank">Generate token</a></small>
+                </div>
+                <button id="enable-webhook" class="btn btn-primary">Enable Auto Sync</button>
+            </div>
+            
+            <div id="webhook-active" style="display: none;">
+                <p class="success-message">✅ Auto sync is enabled! Your documentation will automatically update when you push changes.</p>
+                <div class="github-token-input">
+                    <label for="github-token-remove">GitHub Personal Access Token:</label>
+                    <input type="password" id="github-token-remove" placeholder="Enter your GitHub token">
+                    <small>Required to remove webhook.</small>
+                </div>
+                <button id="disable-webhook" class="btn btn-danger">Disable Auto Sync</button>
+            </div>
+            
+            <div id="not-github-repo" style="display: none;">
+                <p>Auto sync is only available for repositories created from GitHub URLs.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.webhook-section {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.webhook-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.webhook-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.webhook-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.active {
+    background-color: #4caf50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.status-indicator.inactive {
+    background-color: #f44336;
+}
+
+.status-indicator.loading {
+    background-color: #ff9800;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+#webhook-status-text {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.repo-info {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.repo-info p {
+    color: white;
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.error-info {
+    background: #3d1a1a;
+    border-left: 3px solid #f44336;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.error-info p {
+    color: #ffcccb;
+}
+
+.webhook-actions {
+    margin-top: 15px;
+}
+
+.github-token-input {
+    margin-bottom: 15px;
+}
+
+.github-token-input label {
+    display: block;
+    color: white;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.github-token-input input {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.github-token-input small {
+    color: #ccc;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 3px;
+}
+
+.github-token-input small a {
+    color: #4fc3f7;
+    text-decoration: none;
+}
+
+.github-token-input small a:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #da190b;
+}
+
+.success-message {
+    color: #4caf50;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const docId = {{ doc_id }};
+    const webhookControls = document.getElementById('webhook-controls');
+    const statusIndicator = document.getElementById('webhook-status-indicator');
+    const statusText = document.getElementById('webhook-status-text');
+    const githubRepoInfo = document.getElementById('github-repo-info');
+    const webhookSetup = document.getElementById('webhook-setup');
+    const webhookActive = document.getElementById('webhook-active');
+    const notGithubRepo = document.getElementById('not-github-repo');
+    const enableBtn = document.getElementById('enable-webhook');
+    const disableBtn = document.getElementById('disable-webhook');
+    
+    // Load webhook status
+    function loadWebhookStatus() {
+        fetch(`/webhook/api/status/${docId}/`)
+            .then(response => response.json())
+            .then(data => {
+                webhookControls.style.display = 'block';
+                
+                if (data.is_github_repo) {
+                    githubRepoInfo.style.display = 'block';
+                    document.getElementById('repo-url').textContent = data.repo_url;
+                    
+                    if (data.last_sync_at) {
+                        const syncDate = new Date(data.last_sync_at).toLocaleString();
+                        document.getElementById('last-sync').textContent = syncDate;
+                    }
+                    
+                    if (data.sync_failures > 0) {
+                        document.getElementById('sync-errors').style.display = 'block';
+                        document.getElementById('failure-count').textContent = data.sync_failures;
+                        document.getElementById('last-error').textContent = data.last_error || 'Unknown error';
+                    }
+                    
+                    if (data.webhook_active) {
+                        statusIndicator.className = 'status-indicator active';
+                        statusText.textContent = 'Auto Sync Enabled';
+                        webhookActive.style.display = 'block';
+                        webhookSetup.style.display = 'none';
+                    } else {
+                        statusIndicator.className = 'status-indicator inactive';
+                        statusText.textContent = 'Auto Sync Disabled';
+                        webhookSetup.style.display = 'block';
+                        webhookActive.style.display = 'none';
+                    }
+                } else {
+                    notGithubRepo.style.display = 'block';
+                    statusIndicator.className = 'status-indicator inactive';
+                    statusText.textContent = 'Not Available';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading webhook status:', error);
+                statusIndicator.className = 'status-indicator inactive';
+                statusText.textContent = 'Error';
+            });
+    }
+    
+    // Enable webhook
+    enableBtn.addEventListener('click', function() {
+        const token = document.getElementById('github-token').value;
+        if (!token) {
+            alert('Please enter your GitHub token');
+            return;
+        }
+        
+        statusIndicator.className = 'status-indicator loading';
+        statusText.textContent = 'Setting up...';
+        enableBtn.disabled = true;
+        
+        fetch('/webhook/api/setup/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                doc_id: docId,
+                github_token: token
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Auto sync enabled successfully!');
+                document.getElementById('github-token').value = '';
+                loadWebhookStatus();
+            } else {
+                alert('Error: ' + data.error);
+                statusIndicator.className = 'status-indicator inactive';
+                statusText.textContent = 'Setup Failed';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while setting up auto sync');
+            statusIndicator.className = 'status-indicator inactive';
+            statusText.textContent = 'Setup Failed';
+        })
+        .finally(() => {
+            enableBtn.disabled = false;
+        });
+    });
+    
+    // Disable webhook
+    disableBtn.addEventListener('click', function() {
+        const token = document.getElementById('github-token-remove').value;
+        if (!token) {
+            alert('Please enter your GitHub token');
+            return;
+        }
+        
+        if (!confirm('Are you sure you want to disable auto sync?')) {
+            return;
+        }
+        
+        statusIndicator.className = 'status-indicator loading';
+        statusText.textContent = 'Removing...';
+        disableBtn.disabled = true;
+        
+        fetch('/webhook/api/remove/', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                doc_id: docId,
+                github_token: token
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Auto sync disabled successfully!');
+                document.getElementById('github-token-remove').value = '';
+                loadWebhookStatus();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while disabling auto sync');
+        })
+        .finally(() => {
+            disableBtn.disabled = false;
+            loadWebhookStatus();
+        });
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Load status on page load
+    loadWebhookStatus();
+});
+</script>

@@ -23,8 +23,7 @@
             <div class="input-option-divider">
               <span>OR</span>
             </div>
-            
-            <div class="input-option">
+<div class="input-option">
               <div class="github-url-container">
                 <span class="github-url-label">Enter GitHub Repository URL</span>
                 <input type="text" name="github_url" id="github-url" placeholder="https://github.com/username/repository" class="github-url-input">
@@ -32,6 +31,36 @@
             </div>
           </div>
           
+          <!-- Auto-Sync Options for GitHub URLs -->
+          <div class="github-sync-options" id="github-sync-options" style="display: none;">
+            <div class="sync-option-header">
+              <h4>Auto-Sync Settings</h4>
+              <p class="sync-description">Keep your documentation synchronized with GitHub repository changes</p>
+            </div>
+            
+            <div class="radio-options">
+              <label class="sync-option">
+                <input type="radio" name="auto_sync" value="disabled" id="sync-disabled" checked>
+                <span class="sync-label">Manual Sync</span>
+                <span class="sync-desc">Update documentation manually</span>
+              </label>
+              
+              <label class="sync-option">
+                <input type="radio" name="auto_sync" value="enabled" id="sync-enabled">
+                <span class="sync-label">Auto-Sync</span>
+                <span class="sync-desc">Automatically update on GitHub changes</span>
+              </label>
+            </div>
+            
+            <div class="github-token-input" id="github-token-input" style="display: none;">
+              <label for="github_token">GitHub Personal Access Token:</label>
+              <input type="password" name="github_token" id="github_token" placeholder="ghp_xxxxxxxxxxxxxxxx">
+              <small>Required for auto-sync. Token needs 'repo' and 'admin:repo_hook' permissions.</small>
+              <div class="token-help">
+                <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">How to create a GitHub token?</a>
+              </div>
+            </div>
+          </div>          
           <div class="visibility-options">
             {% if user.is_authenticated %}
               <label>
@@ -307,6 +336,32 @@
         // Show corresponding content
         const tabId = button.getAttribute('data-tab');
         document.getElementById(tabId + '-tab').classList.add('active');
+      });
+    });
+    
+    // Auto-sync options functionality
+    const githubUrlInput = document.getElementById('github-url');
+    const syncOptions = document.getElementById('github-sync-options');
+    const syncRadios = document.querySelectorAll('input[name="auto_sync"]');
+    const tokenInput = document.getElementById('github-token-input');
+    
+    // Show sync options when GitHub URL is entered
+    githubUrlInput.addEventListener('input', function() {
+      if (this.value.includes('github.com')) {
+        syncOptions.style.display = 'block';
+      } else {
+        syncOptions.style.display = 'none';
+      }
+    });
+    
+    // Show/hide token input based on sync option
+    syncRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'enabled') {
+          tokenInput.style.display = 'block';
+        } else {
+          tokenInput.style.display = 'none';
+        }
       });
     });
   });

@@ -22,6 +22,9 @@
     <!-- Documentation Content (Center) -->
     <div class="doc-content">
       <h2>{{ doc_folder.folder_name }}</h2>
+      
+      <!-- Webhook Controls -->
+      {% include 'webhook/webhook_controls.html' with doc_id=doc_folder.id %}
       <div id="markdown-content" class="markdown-content">
         {% if current_file_content %}
           {{ current_file_content|safe }}

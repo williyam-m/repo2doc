@@ -40,7 +40,6 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -55,9 +54,9 @@ INSTALLED_APPS = [
     'doc_view',
     'chat',
     'users',
-    'organization'
+    'organization',
+    'webhook'
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

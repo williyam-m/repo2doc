@@ -22,9 +22,35 @@
       </div>
     </div>
 
-    <!-- Documentation Content (Center) -->
+<!-- Documentation Content (Center) -->
     <div class="doc-content">
       <h2>{{ doc_folder.folder_name }}</h2>
+      
+      <!-- Sync Status Display -->
+      {% if doc_folder.source_type == 'github' %}
+      <div class="sync-status">
+        <h4>Repository Status</h4>
+        <p><strong>Source:</strong> GitHub Repository</p>
+        <p><strong>Auto-Sync:</strong> 
+          {% if doc_folder.auto_sync %}
+            <span class="status-enabled">✓ Enabled</span>
+            <small> - Documentation will update automatically when you push to GitHub</small>
+          {% else %}
+            <span class="status-disabled">✗ Disabled</span>
+            <small> - Documentation updates manually only</small>
+          {% endif %}
+        </p>
+        {% if doc_folder.is_github_repo %}
+          {% if doc_folder.github_repo.last_sync_at %}
+            <p><strong>Last Sync:</strong> {{ doc_folder.github_repo.last_sync_at|date:"M d, Y H:i" }}</p>
+          {% endif %}
+          {% if doc_folder.github_repo.last_error_message %}
+            <p><strong>Last Error:</strong> <span style="color: #ff6b6b;">{{ doc_folder.github_repo.last_error_message }}</span></p>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% endif %}
+      
       <div id="markdown-content" class="markdown-content">
         {% if current_file_content %}
           {{ current_file_content|safe }}
@@ -33,7 +59,6 @@
         {% endif %}
       </div>
     </div>
-
     <!-- Chat Container (Right) - Resizable -->
     <div class="chat-container" id="chat-container">
       <div class="chat-toggle" onclick="toggleChat()">

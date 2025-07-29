@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('dashboard.urls')),   
@@ -26,9 +25,10 @@ urlpatterns = [
     path('chat/', include('chat.urls')),
     path('users/', include('users.urls')),
     path('organization/', include('organization.urls')),
+    path('webhook/', include('webhook.urls')),
     
     # API calls should point directly to the view for simplicity
     path('api/file-content/', include('doc_view.urls_api')),
+    path('', include('social_django.urls', namespace='social')),
 ]
-
 

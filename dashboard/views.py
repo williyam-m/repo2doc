@@ -1,12 +1,13 @@
 import os, zipfile, tempfile
 import requests
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from message_resource.api_message_resource import *
 from .models import GeneratedDocFolder
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User  
 from organization.models import Organization, OrganizationMember
+from webhook.models import GitHubRepository
 
 def index(request):
     context = {}
@@ -48,19 +49,9 @@ def index(request):
         visibility = request.POST.get('visibility', 'public')
         organization_id = request.POST.get('organization_id') if visibility == 'organization' else None
         
-        if organization_id:
-            try:
-                organization = Organization.objects.get(id=organization_id)
-                # Verify user is a member of this organization
-                if not OrganizationMember.objects.filter(organization=organization, user=request.user).exists():
-                    organization = None
-            except Organization.DoesNotExist:
-                organization = None
-        else:
-            organization = None
-
         # Initialize organization to None
-        if organization_id:
+        organization = None
+        if organization_id and request.user.is_authenticated:
             try:
                 organization = Organization.objects.get(id=organization_id)
                 # Verify user is a member of this organization
@@ -68,9 +59,7 @@ def index(request):
                     organization = None
             except Organization.DoesNotExist:
                 organization = None
-        else:
-            organization = None
-
+        
         # Process GitHub URL if provided
         if github_url and github_url.startswith(('https://github.com/', 'http://github.com/')):
             try:
@@ -82,16 +71,24 @@ def index(request):
                         owner = parts[-2]
                         repo = parts[-1]
                         
-                        # Construct API URL to get the zip archive
+                        # Get API URL to get the zip archive
                         zip_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/main.zip"
                         
                         # Try to download the ZIP file
                         response = requests.get(zip_url, stream=True)
+                        branch = 'main'
                         if response.status_code == 404:
                             # Try master branch if main doesn't exist
                             zip_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/master.zip"
                             response = requests.get(zip_url, stream=True)
-                            
+                            branch = 'master'
+                        
+                        # If still not found, try without branch specification (gets default branch)
+                        if response.status_code == 404:
+                            zip_url = f"https://api.github.com/repos/{owner}/{repo}/zipball"
+                            response = requests.get(zip_url, stream=True)
+                            branch = 'default'
+                        
                         if response.status_code == 200:
                             # Save zip file
                             zip_path = os.path.join(temp_dir, f"{repo}.zip")
@@ -99,15 +96,16 @@ def index(request):
                                 for chunk in response.iter_content(chunk_size=8192):
                                     f.write(chunk)
                                     
-                            # Continue with zip file processing
-                            return process_zip_file(request, zip_path, visibility, organization, context)
+                            # Continue with zip file processing, passing GitHub info
+                            return process_zip_file(request, zip_path, visibility, organization, context, 
+                                                  github_info={'url': github_url, 'owner': owner, 'repo': repo, 'branch': branch})
                         else:
                             context[API_KEY_NAME.ERROR] = f"Failed to download repository: HTTP {response.status_code}"
                     else:
-                        context[API_KEY_NAME.ERROR] = "Invalid GitHub repository URL format"
+                        context[API_KEY_NAME.ERROR] = "Invalid GitHub repository URL format. Please use format: https://github.com/owner/repo"
             except Exception as e:
-                context[API_KEY_NAME.ERROR] = f"Error processing GitHub URL: {str(e)}"
-                
+                context[API_KEY_NAME.ERROR] = f"Error processing GitHub URL: {str(e)}"                
+        
         # Process uploaded ZIP file
         elif uploaded_file and zipfile.is_zipfile(uploaded_file):
             with tempfile.TemporaryDirectory() as temp_zip_dir:
@@ -115,18 +113,16 @@ def index(request):
                 with open(zip_path, 'wb') as f:
                     for chunk in uploaded_file.chunks():
                         f.write(chunk)
-                
-                return process_zip_file(request, zip_path, visibility, organization, context)
+                return process_zip_file(request, zip_path, visibility, organization, context, github_info=None)
         else:
             context[API_KEY_NAME.ERROR] = ErrorMessages.INVALID_FILE_TYPE
 
     return render(request, 'index.html', context)
-    
-def process_zip_file(request, zip_path, visibility, organization, context):
+
+def process_zip_file(request, zip_path, visibility, organization, context, github_info=None):
     """Process the zip file and generate documentation"""
     with tempfile.TemporaryDirectory() as temp_dir:
-
-                # Extract filename from the zip path
+        # Extract filename from the zip path
         zip_filename = os.path.basename(zip_path)
         zip_name = os.path.splitext(zip_filename)[0]
         
@@ -172,19 +168,34 @@ def process_zip_file(request, zip_path, visibility, organization, context):
                     with open(md_path, 'w', encoding='utf-8') as doc_file:
                         doc_file.write(documentation)
 
+        # Determine source type
+        source_type = 'github' if github_info else 'upload'
+
         # Save folder path to DB with user if authenticated
         if request.user.is_authenticated:
-            GeneratedDocFolder.objects.create(
+            doc_folder = GeneratedDocFolder.objects.create(
                 folder_path=docs_output_root, 
                 user=request.user,
                 visibility=visibility,
-                organization=organization
+                organization=organization,
+                source_type=source_type
             )
         else:
             # Anonymous users can only create public docs
-            GeneratedDocFolder.objects.create(
+            doc_folder = GeneratedDocFolder.objects.create(
                 folder_path=docs_output_root,
-                visibility='public'
+                visibility='public',
+                source_type=source_type
+            )
+
+        # Create GitHub repository record if this was from GitHub
+        if github_info and request.user.is_authenticated:
+            GitHubRepository.objects.create(
+                doc_folder=doc_folder,
+                github_url=github_info['url'],
+                owner=github_info['owner'],
+                repo_name=github_info['repo'],
+                branch=github_info['branch']
             )
 
         context[API_KEY_NAME.MESSAGE] = SuccessMessages.DOCUMENTATION_GENERATED
@@ -198,7 +209,6 @@ def process_zip_file(request, zip_path, visibility, organization, context):
         context['doc_folders'] = public_doc_folders
         
         # Store the ID of the newly created doc for the view link
-        latest_doc = GeneratedDocFolder.objects.filter(folder_path=docs_output_root).latest('uploaded_at')
-        context['latest_doc_id'] = latest_doc.id
+        context['latest_doc_id'] = doc_folder.id
         
     return render(request, 'index.html', context)

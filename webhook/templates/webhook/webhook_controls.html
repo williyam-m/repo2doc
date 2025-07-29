@@ -1,0 +1,195 @@
+{% if doc_folder.is_github_repo %}
+<div class="webhook-controls" id="webhook-controls">
+    <h3>Auto Sync Settings</h3>
+    <div class="webhook-status" id="webhook-status">
+        <p>Loading webhook status...</p>
+    </div>
+
+    <div class="webhook-form" id="webhook-form" style="display:none;">
+        <div class="webhook-description">
+            <p>Enable automatic synchronization with your GitHub repository. 
+            Any changes pushed to your repository will automatically update this documentation.</p>
+        </div>
+        
+        <div class="webhook-token-input">
+            <label for="github-token">GitHub Personal Access Token:</label>
+            <input type="password" id="github-token" placeholder="Enter your GitHub token">
+            <small>Tokens are not stored. They are only used to set up the webhook.</small>
+        </div>
+        
+        <div class="webhook-actions">
+            <button id="enable-webhook" class="btn btn-primary">Enable Auto Sync</button>
+            <button id="disable-webhook" class="btn btn-danger" style="display:none;">Disable Auto Sync</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const docId = {{ doc_id }};
+    
+    // Fetch webhook status
+    fetch(`/webhook/api/status/${docId}/`)
+        .then(response => response.json())
+        .then(data => {
+            const statusDiv = document.getElementById('webhook-status');
+            const formDiv = document.getElementById('webhook-form');
+            const enableButton = document.getElementById('enable-webhook');
+            const disableButton = document.getElementById('disable-webhook');
+            
+            if (data.is_github_repo) {
+                formDiv.style.display = 'block';
+                
+                if (data.webhook_active) {
+                    // Webhook is active
+                    statusDiv.innerHTML = `
+                        <div class="status-active">
+                            <span class="status-indicator active"></span>
+                            <span>Auto Sync: Active</span>
+                        </div>
+                        <div class="webhook-details">
+                            <p>Last sync: ${data.last_sync_at ? new Date(data.last_sync_at).toLocaleString() : 'Never'}</p>
+                            ${data.last_error ? `<p class="error">Last error: ${data.last_error}</p>` : ''}
+                            <p>Repository: <a href="${data.repo_url}" target="_blank">${data.repo_url}</a></p>
+                        </div>
+                    `;
+                    
+                    enableButton.style.display = 'none';
+                    disableButton.style.display = 'inline-block';
+                } else {
+                    // Webhook is not active
+                    statusDiv.innerHTML = `
+                        <div class="status-inactive">
+                            <span class="status-indicator inactive"></span>
+                            <span>Auto Sync: Inactive</span>
+                        </div>
+                        <div class="webhook-description">
+                            <p>Set up automatic synchronization with your GitHub repository:</p>
+                            <ol>
+                                <li>Create a <a href="https://github.com/settings/tokens/new" target="_blank">GitHub Personal Access Token</a> with the 'repo' scope.</li>
+                                <li>Enter your token below to set up the webhook.</li>
+                            </ol>
+                        </div>
+                    `;
+                    
+                    enableButton.style.display = 'inline-block';
+                    disableButton.style.display = 'none';
+                }
+            } else {
+                // Not a GitHub repository
+                statusDiv.innerHTML = `
+                    <p>This feature is only available for documentation generated from GitHub repositories.</p>
+                `;
+                formDiv.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching webhook status:', error);
+            document.getElementById('webhook-status').innerHTML = `
+                <p class="error">Error loading webhook status. Please try again later.</p>
+            `;
+        });
+    
+    // Enable webhook
+    document.getElementById('enable-webhook').addEventListener('click', function() {
+        const token = document.getElementById('github-token').value;
+        if (!token) {
+            alert('Please enter your GitHub token');
+            return;
+        }
+        
+        fetch('/webhook/api/setup/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                doc_id: docId,
+                github_token: token
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Webhook set up successfully! Your documentation will now automatically update when you push changes to your repository.');
+                // Reload the page to refresh the status
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error setting up webhook:', error);
+            alert('Error setting up webhook. Please try again later.');
+        })
+        .finally(() => {
+            // Clear the token for security
+            document.getElementById('github-token').value = '';
+        });
+    });
+    
+    // Disable webhook
+    document.getElementById('disable-webhook').addEventListener('click', function() {
+        const token = document.getElementById('github-token').value;
+        if (!token) {
+            alert('Please enter your GitHub token');
+            return;
+        }
+        
+        if (!confirm('Are you sure you want to disable auto sync? Your documentation will no longer update automatically.')) {
+            return;
+        }
+        
+        fetch('/webhook/api/remove/', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                doc_id: docId,
+                github_token: token
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Webhook removed successfully. Auto sync is now disabled.');
+                // Reload the page to refresh the status
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error removing webhook:', error);
+            alert('Error removing webhook. Please try again later.');
+        })
+        .finally(() => {
+            // Clear the token for security
+            document.getElementById('github-token').value = '';
+        });
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/webhook_styles.css' %}">
+{% endif %}
