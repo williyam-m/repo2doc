@@ -1,2 +1,0 @@
-# Additional requirements for webhook functionality
-requests>=2.28.0

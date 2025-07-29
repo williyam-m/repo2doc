@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sync Logs{% endblock %}
+
+{% block content %}
+<div class="logs-container">
+    <div class="logs-header">
+        <h2>Sync Logs for {{ doc.folder_name }}</h2>
+        <a href="{% url 'developer_console:console' %}" class="white-button">Back to Console</a>
+    </div>
+
+    <div class="logs-list">
+        {% for log in logs %}
+        <div class="log-entry {% if log.verified %}verified{% endif %}">
+            <div class="log-header">
+                <span class="log-time">{{ log.created_at }}</span>
+                <span class="log-status {{ log.status }}">{{ log.status }}</span>
+            </div>
+            <div class="log-details">
+                <p>{{ log.message }}</p>
+                {% if log.files_changed %}
+                <div class="changed-files">
+                    <h4>Files Changed:</h4>
+                    <ul>
+                    {% for file in log.files_changed %}
+                        <li>{{ file }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% if log.verified %}
+            <div class="verification-badge">
+                <span>✓ Verified by GitHub</span>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="no-logs">
+            <p>No sync logs available yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

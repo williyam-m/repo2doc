@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'chat',
     'users',
     'organization',
-    'webhook'
+    'webhook',
+    'developer_console'
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -164,6 +165,9 @@ LLAMA_CPP_PATH = "/home/workspace/llama.cpp/build/models/llama-2-7b.Q4_K_M.gguf"
 
 # Google GenAI API Key
 GOOGLE_GENAI_API_KEY = os.getenv('GOOGLE_GENAI_API_KEY', '')
+
+# Encryption key for storing GitHub tokens
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', 'your-default-key-here-must-be-32-chars!')
 
 # Authentication settings
 AUTHENTICATION_BACKENDS = (

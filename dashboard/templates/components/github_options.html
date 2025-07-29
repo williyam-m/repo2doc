@@ -1,0 +1,29 @@
+{% if github_url %}
+<div class="github-sync-options">
+    <h4>Auto Sync Configuration</h4>
+    <div class="sync-options">
+        <label class="sync-option">
+            <input type="radio" name="sync_type" value="auto" checked>
+            <span class="sync-box">
+                <i class="fas fa-sync-alt"></i>
+                Auto Sync
+            </span>
+        </label>
+        <label class="sync-option">
+            <input type="radio" name="sync_type" value="manual">
+            <span class="sync-box">
+                <i class="fas fa-hand-paper"></i>
+                Manual Sync
+            </span>
+        </label>
+    </div>
+    
+    <div id="github-token-container" class="token-container">
+        <input type="text" 
+               name="github_token" 
+               placeholder="Enter GitHub Token" 
+               class="github-token-input">
+        <small class="token-help">Required for auto-sync with your repository</small>
+    </div>
+</div>
+{% endif %}

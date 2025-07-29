@@ -1,0 +1,138 @@
+.github-sync-options {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.github-sync-options h4 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.sync-options {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sync-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.sync-option input[type="radio"] {
+    display: none;
+}
+
+.sync-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.sync-option input[type="radio"]:checked + .sync-box {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: white;
+}
+
+.token-container {
+    margin-top: 1rem;
+}
+
+.github-token-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.token-help {
+    display: block;
+    margin-top: 0.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+/* GitHub URL Input Styles */
+.github-url-container {
+    margin-bottom: 1rem;
+}
+
+.github-url-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.or-divider {
+    text-align: center;
+    color: white;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.or-divider::before,
+.or-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.or-divider::before {
+    left: 0;
+}
+
+.or-divider::after {
+    right: 0;
+}
+
+/* File Upload Zone Styles */
+.file-upload-container {
+    margin-bottom: 1rem;
+}
+
+.upload-zone {
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.upload-zone i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.upload-zone p {
+    margin: 0;
+}
+
+.file-input {
+    display: none;
+}

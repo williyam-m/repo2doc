@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Developer Console{% endblock %}
+
+{% block content %}
+<div class="dev-console-container">
+    <h1 class="dev-console-title">Developer Console</h1>
+    
+    <div class="repo-list">
+        {% for doc in github_docs %}
+        <div class="repo-card">
+            <div class="repo-header">
+                <h3>{{ doc.folder_name }}</h3>
+                <div class="sync-status {% if doc.auto_sync %}enabled{% else %}disabled{% endif %}">
+                    Auto Sync: {{ doc.auto_sync|yesno:"Enabled,Disabled" }}
+                </div>
+            </div>
+            
+            <div class="repo-actions">
+                {% if not doc.auto_sync %}
+                <form method="POST" action="{% url 'developer_console:enable_sync' doc.id %}" class="token-form">
+                    {% csrf_token %}
+                    <input type="text" name="github_token" placeholder="Enter GitHub Token" required>
+                    <button type="submit" class="white-button">Enable Auto Sync</button>
+                </form>
+                {% else %}
+                <form method="POST" action="{% url 'developer_console:disable_sync' doc.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="white-button">Disable Auto Sync</button>
+                </form>
+                {% endif %}
+                
+                <button onclick="window.location.href='{% url 'developer_console:view_logs' doc.id %}'" class="white-button">
+                    View Logs
+                </button>
+            </div>
+            
+            <div class="last-sync">
+                {% if doc.last_sync_time %}
+                Last synced: {{ doc.last_sync_time|timesince }} ago
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-repos">
+            <p>No GitHub repositories found. Create documentation from a GitHub URL to enable auto-sync features.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

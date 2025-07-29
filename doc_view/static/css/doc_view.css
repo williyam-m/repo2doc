@@ -1,0 +1,79 @@
+/* Doc View Styles */
+
+/* Header action buttons */
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.header-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none;
+  color: white;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.header-action-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.header-action-btn.settings-btn {
+  background-color: #3498db;
+}
+
+.header-action-btn.logs-btn {
+  background-color: #9b59b6;
+}
+
+.header-action-btn.console-btn {
+  background-color: #2c3e50;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.status-badge.enabled {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.status-badge.disabled {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .doc-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .doc-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

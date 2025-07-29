@@ -48,6 +48,24 @@ def index(request):
         github_url = request.POST.get('github_url', '').strip()
         visibility = request.POST.get('visibility', 'public')
         organization_id = request.POST.get('organization_id') if visibility == 'organization' else None
+        auto_sync = request.POST.get('auto_sync', 'disabled')
+        github_token = None
+        
+        # Get token from user profile if authenticated and auto_sync is enabled
+        if auto_sync == 'enabled' and request.user.is_authenticated:
+            try:
+                profile = request.user.profile
+                if profile.has_github_token():
+                    github_token = profile.get_github_token()
+                else:
+                    # If auto-sync is requested but no token is stored, ask for it
+                    github_token = request.POST.get('github_token', '').strip()
+                    if github_token:
+                        # Store the token for future use
+                        profile.set_github_token(github_token)
+                        profile.save()
+            except:
+                github_token = request.POST.get('github_token', '').strip()
         
         # Initialize organization to None
         organization = None
@@ -190,13 +208,44 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
 
         # Create GitHub repository record if this was from GitHub
         if github_info and request.user.is_authenticated:
-            GitHubRepository.objects.create(
+            github_repo = GitHubRepository.objects.create(
                 doc_folder=doc_folder,
                 github_url=github_info['url'],
                 owner=github_info['owner'],
                 repo_name=github_info['repo'],
-                branch=github_info['branch']
+                branch=github_info['branch'],
+                auto_sync_enabled=False  # Default to disabled, user can enable later
             )
+            
+            # If auto_sync was requested and we have a token, set it up
+            auto_sync_requested = request.POST.get('auto_sync', 'disabled') == 'enabled'
+            github_token = request.POST.get('github_token', '').strip()
+            
+            if auto_sync_requested and github_token:
+                try:
+                    from webhook.services import GitHubWebhookService
+                    service = GitHubWebhookService()
+                    success, message = service.setup_webhook(
+                        github_info['url'],
+                        github_token,
+                        doc_folder
+                    )
+                    if success:
+                        context['auto_sync_message'] = 'Auto-sync enabled successfully!'
+                        # Store the token for future use
+                        if request.user.is_authenticated:
+                            try:
+                                profile = request.user.profile
+                                profile.set_github_token(github_token)
+                                profile.save()
+                            except:
+                                pass
+                    else:
+                        context['auto_sync_error'] = f'Auto-sync setup failed: {message}'
+                except Exception as e:
+                    context['auto_sync_error'] = f'Auto-sync setup error: {str(e)}'
+            elif auto_sync_requested and not github_token:
+                context['auto_sync_error'] = 'GitHub token is required to enable auto-sync'
 
         context[API_KEY_NAME.MESSAGE] = SuccessMessages.DOCUMENTATION_GENERATED
         

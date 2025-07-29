@@ -30,13 +30,13 @@ class GitHubRepository(models.Model):
     
     # Status tracking
     sync_failures = models.IntegerField(default=0)
-    last_error_message = models.TextField(null=True, blank=True)
+    last_sync_error = models.TextField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        unique_together = ["owner", "repo_name"]
+        unique_together = []  # Remove unique constraint to allow multiple docs from same repo
     
     def __str__(self):
         return f"{self.owner}/{self.repo_name}"

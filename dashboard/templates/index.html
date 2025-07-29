@@ -53,12 +53,22 @@
             </div>
             
             <div class="github-token-input" id="github-token-input" style="display: none;">
-              <label for="github_token">GitHub Personal Access Token:</label>
-              <input type="password" name="github_token" id="github_token" placeholder="ghp_xxxxxxxxxxxxxxxx">
-              <small>Required for auto-sync. Token needs 'repo' and 'admin:repo_hook' permissions.</small>
-              <div class="token-help">
-                <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">How to create a GitHub token?</a>
-              </div>
+              {% if user.is_authenticated and user.profile.has_github_token %}
+                <div class="token-status">
+                  <span style="color: #28a745;">✓ GitHub token configured</span>
+                  <small>Using stored token from your profile</small>
+                </div>
+              {% else %}
+                <label for="github_token">GitHub Personal Access Token:</label>
+                <input type="password" name="github_token" id="github_token" placeholder="ghp_xxxxxxxxxxxxxxxx">
+                <small>Required for auto-sync. Token needs 'repo' and 'admin:repo_hook' permissions.</small>
+                <div class="token-help">
+                  <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank">How to create a GitHub token?</a>
+                  {% if user.is_authenticated %}
+                    | <a href="{% url 'profile' user.username %}">Manage tokens in profile</a>
+                  {% endif %}
+                </div>
+              {% endif %}
             </div>
           </div>          
           <div class="visibility-options">
@@ -156,10 +166,10 @@
           <p>Create or join a team workspace</p>
         </div>
       </a>
-      <a href="#" class="nav-box">
+      <a href="{% url 'developer_console:dashboard' %}" class="nav-box">
         <div class="nav-box-content">
           <h3 style="font-size: 1rem;">Developer Console</h3>
-          <p>Coming soon</p>
+          <p>Manage auto-sync and view logs</p>
         </div>
       </a>
     </div>

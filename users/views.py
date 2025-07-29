@@ -1,9 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
+from django.contrib import messages
 from .models import Profile
 from dashboard.models import GeneratedDocFolder
 import logging
@@ -19,6 +20,9 @@ def profile(request, username=None):
     """View user profile"""
     if username:
         user = get_object_or_404(User, username=username)
+        # Only allow users to view their own profile
+        if user != request.user:
+            return redirect('user_profile', username=request.user.username)
     else:
         user = request.user
     
@@ -30,13 +34,38 @@ def profile(request, username=None):
         profile = Profile.objects.create(user=user)
         logger.warning(f"Created missing profile for {user.username}")
     
-    # Get user's generated docs
-    user_doc_folders = GeneratedDocFolder.objects.filter(user=user).order_by('-uploaded_at')
+    # Handle token management
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'add_token':
+            token = request.POST.get('github_token', '').strip()
+            if token:
+                profile.set_github_token(token)
+                profile.save()
+                messages.success(request, 'GitHub token added successfully!')
+            else:
+                messages.error(request, 'Please provide a valid GitHub token.')
+        
+        elif action == 'update_token':
+            token = request.POST.get('github_token', '').strip()
+            if token:
+                profile.set_github_token(token)
+                profile.save()
+                messages.success(request, 'GitHub token updated successfully!')
+            else:
+                messages.error(request, 'Please provide a valid GitHub token.')
+        
+        elif action == 'delete_token':
+            profile.set_github_token(None)
+            profile.save()
+            messages.success(request, 'GitHub token deleted successfully!')
+        
+        return redirect('user_profile', username=user.username)
     
     context = {
         'profile_user': user,
         'profile': profile,
-        'user_doc_folders': user_doc_folders,
     }
     
     return render(request, 'users/profile.html', context)

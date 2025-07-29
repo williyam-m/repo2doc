@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Auto-Sync Settings - {{ doc_folder.folder_name }} - Repo2Doc{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="settings-header">
+        <div class="breadcrumb">
+            <a href="{% url 'developer_console:dashboard' %}">Developer Console</a>
+            <span>/</span>
+            <span>{{ doc_folder.folder_name }}</span>
+            <span>/</span>
+            <span>Auto-Sync Settings</span>
+        </div>
+        <h1>Auto-Sync Settings</h1>
+        <p class="settings-description">Configure automatic synchronization for {{ doc_folder.folder_name }}</p>
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="settings-content">
+        <div class="repo-info">
+            <div class="repo-details">
+                <h3>Repository Information</h3>
+                <div class="detail-item">
+                    <span class="detail-label">Repository:</span>
+                    <span class="detail-value">{{ doc_folder.folder_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">GitHub URL:</span>
+                    <span class="detail-value">
+                        <a href="{{ doc_folder.github_url }}" target="_blank">{{ doc_folder.github_url }}</a>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Created:</span>
+                    <span class="detail-value">{{ doc_folder.uploaded_at|date:"F j, Y H:i" }}</span>
+                </div>
+                {% if last_sync %}
+                    <div class="detail-item">
+                        <span class="detail-label">Last Sync:</span>
+                        <span class="detail-value">{{ last_sync|date:"F j, Y H:i" }}</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="sync-status-card">
+                <div class="status-header">
+                    <h4>Current Status</h4>
+                    <div class="status-indicator status-{{ sync_enabled|yesno:'enabled,disabled' }}">
+                        <span class="status-dot"></span>
+                        {% if sync_enabled %}
+                            Auto-Sync Enabled
+                        {% else %}
+                            Auto-Sync Disabled
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if sync_error %}
+                    <div class="sync-error">
+                        <h5>Last Error:</h5>
+                        <p>{{ sync_error }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="sync-controls">
+            {% if sync_enabled %}
+                <div class="control-section">
+                    <h3>Auto-Sync is Enabled</h3>
+                    <p>Your documentation will automatically update when you push changes to GitHub.</p>
+                    
+                    <form method="post" class="sync-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="disable">
+                        <button type="submit" class="danger-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+                            </svg>
+                            Disable Auto-Sync
+                        </button>
+                    </form>
+                </div>
+
+                <div class="test-section">
+                    <h4>Test Webhook</h4>
+                    <p>Test the webhook connection to ensure it's working properly.</p>
+                    <button id="test-webhook-btn" class="secondary-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/>
+                        </svg>
+                        Test Connection
+                    </button>
+                    <div id="test-result" class="test-result"></div>
+                </div>
+            {% else %}
+                <div class="control-section">
+                    <h3>Enable Auto-Sync</h3>
+                    {% if has_stored_token %}
+                        <p>Auto-sync can be enabled using your stored GitHub token.</p>
+                        
+                        <form method="post" class="sync-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="enable">
+                            
+                            <div class="token-info">
+                                <div class="info-box">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/>
+                                    </svg>
+                                    Using your stored GitHub token from profile
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="primary-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/>
+                                </svg>
+                                Enable Auto-Sync
+                            </button>
+                        </form>
+                        
+                        <div class="profile-link">
+                            <small>
+                                Want to use a different token? 
+                                <a href="{% url 'user_profile' request.user.username %}">Update in your profile</a>
+                            </small>
+                        </div>
+                    {% else %}
+                        <div class="no-token-section">
+                            <div class="warning-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2M12,21.5C13.38,21.5 14.5,20.38 14.5,19C14.5,17.62 13.38,16.5 12,16.5C10.62,16.5 9.5,17.62 9.5,19C9.5,20.38 10.62,21.5 12,21.5Z"/>
+                                </svg>
+                                <div>
+                                    <h4>GitHub token is required to enable auto-sync</h4>
+                                    <p>Please configure your GitHub Personal Access Token in your profile first to enable automatic synchronization.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons-row">
+                                <a href="{% url 'user_profile' request.user.username %}" class="primary-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                                    </svg>
+                                    Configure Token in Profile
+                                </a>
+                                
+                                <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token" target="_blank" class="secondary-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+                                    </svg>
+                                    How to create a token?
+                                </a>
+                            </div>
+                            
+                            <div class="token-requirements">
+                                <h5>Token Requirements:</h5>
+                                <ul>
+                                    <li>Select <strong>repo</strong> scope for repository access</li>
+                                    <li>Select <strong>admin:repo_hook</strong> scope for webhook management</li>
+                                    <li>Token should have access to the target repository</li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="info-section">
+                    <h4>How Auto-Sync Works</h4>
+                    <ul>
+                        <li>Creates a webhook in your GitHub repository</li>
+                        <li>Listens for push events to the main branch</li>
+                        <li>Automatically updates only changed documentation files</li>
+                        <li>Maintains sync history and error logs</li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'developer_console:log_view' doc_folder.id %}" class="secondary-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z"/>
+            </svg>
+            View Logs
+        </a>
+        <a href="{% url 'view_doc' doc_folder.id %}" class="white-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"/>
+            </svg>
+            View Documentation
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/developer_console.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testBtn = document.getElementById('test-webhook-btn');
+    const testResult = document.getElementById('test-result');
+    
+    if (testBtn) {
+        testBtn.addEventListener('click', function() {
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span>Testing...</span>';
+            testResult.innerHTML = '';
+            
+            fetch('{% url "developer_console:test_webhook" doc_folder.id %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                testResult.className = `test-result ${data.success ? 'success' : 'error'}`;
+                testResult.textContent = data.message;
+                
+                testBtn.disabled = false;
+                testBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/></svg>Test Connection';
+            })
+            .catch(error => {
+                testResult.className = 'test-result error';
+                testResult.textContent = 'Test failed: ' + error.message;
+                
+                testBtn.disabled = false;
+                testBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/></svg>Test Connection';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

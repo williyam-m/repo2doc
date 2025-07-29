@@ -71,6 +71,116 @@
         .profile-section h2 {
             color: #ffffff;
             margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .token-management {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .token-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .token-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .status-active {
+            background-color: #28a745;
+        }
+        
+        .status-inactive {
+            background-color: #dc3545;
+        }
+        
+        .token-form {
+            margin-top: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #545b62;
         }
         
         .btn-back {
@@ -87,6 +197,35 @@
         
         .btn-back:hover {
             background-color: #444;
+        }
+        
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .token-help {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -108,22 +247,63 @@
                 </div>
             </div>
             
-            <div class="profile-section">
-                <h2>Generated Documentation</h2>
-                {% if user_doc_folders %}
-                    <div class="docs-grid">
-                        {% for doc in user_doc_folders %}
-                            <a href="{% url 'view_doc' doc.id %}" class="doc-link">
-                                <div class="doc-card">
-                                    <div class="doc-name">{{ doc.folder_name }}</div>
-                                    <div class="doc-date">{{ doc.uploaded_at|date:"F j, Y" }}</div>
-                                </div>
-                            </a>
-                        {% endfor %}
+            <!-- Display messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
                     </div>
-                {% else %}
-                    <p style="color: #aaa;">No documentation generated yet.</p>
-                {% endif %}
+                {% endfor %}
+            {% endif %}
+            
+            <div class="profile-section">
+                <h2>GitHub Token Management</h2>
+                <div class="token-management">
+                    <div class="token-status">
+                        <div class="token-info">
+                            <div class="status-indicator {% if profile.has_github_token %}status-active{% else %}status-inactive{% endif %}"></div>
+                            <span style="color: #fff;">
+                                {% if profile.has_github_token %}
+                                    GitHub Token: Active
+                                {% else %}
+                                    GitHub Token: Not configured
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="btn-group">
+                            {% if profile.has_github_token %}
+                                <button class="btn btn-secondary" onclick="toggleTokenForm('update')">Update Token</button>
+                                <form method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_token">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your GitHub token?')">Delete Token</button>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-primary" onclick="toggleTokenForm('add')">Add Token</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Add/Update Token Form -->
+                    <form id="tokenForm" method="post" class="token-form hidden">
+                        {% csrf_token %}
+                        <input type="hidden" id="tokenAction" name="action" value="add_token">
+                        
+                        <div class="form-group">
+                            <label for="github_token">GitHub Personal Access Token:</label>
+                            <input type="password" id="github_token" name="github_token" placeholder="Enter your GitHub token" required>
+                            <div class="token-help">
+                                Used for auto-sync functionality with GitHub repositories. 
+                                <a href="https://github.com/settings/tokens" target="_blank" style="color: #007bff;">Generate token here</a>
+                            </div>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary" id="tokenSubmitBtn">Add Token</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleTokenForm('')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             
             <a href="{% url 'index' %}" class="btn-back">Back to Home</a>
@@ -133,5 +313,27 @@
             {% endif %}
         </div>
     </div>
+    
+    <script>
+        function toggleTokenForm(action) {
+            const form = document.getElementById('tokenForm');
+            const actionInput = document.getElementById('tokenAction');
+            const submitBtn = document.getElementById('tokenSubmitBtn');
+            
+            if (action) {
+                form.classList.remove('hidden');
+                if (action === 'add') {
+                    actionInput.value = 'add_token';
+                    submitBtn.textContent = 'Add Token';
+                } else if (action === 'update') {
+                    actionInput.value = 'update_token';
+                    submitBtn.textContent = 'Update Token';
+                }
+            } else {
+                form.classList.add('hidden');
+                document.getElementById('github_token').value = '';
+            }
+        }
+    </script>
 </body>
 </html>

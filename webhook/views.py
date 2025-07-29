@@ -407,14 +407,13 @@ def setup_webhook(request):
                 'error': 'Permission denied'
             }, status=status.HTTP_403_FORBIDDEN)
         
-        # Check if GitHub repository record exists
+# Check if GitHub repository record exists
         try:
-            github_repo = GitHubRepository.objects.get(doc_folder=doc_folder)
+            github_repo = doc_folder.github_repo
         except GitHubRepository.DoesNotExist:
             return Response({
                 'error': 'This document was not created from a GitHub repository'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
+            }, status=status.HTTP_400_BAD_REQUEST)        
         # Setup webhook
         success, message = GitHubWebhookService.create_webhook(github_repo, github_token)
         
@@ -456,14 +455,13 @@ def remove_webhook(request):
                 'error': 'Permission denied'
             }, status=status.HTTP_403_FORBIDDEN)
         
-        # Check if GitHub repository record exists
+# Check if GitHub repository record exists  
         try:
-            github_repo = GitHubRepository.objects.get(doc_folder=doc_folder)
+            github_repo = doc_folder.github_repo
         except GitHubRepository.DoesNotExist:
             return Response({
                 'error': 'This document was not created from a GitHub repository'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
+            }, status=status.HTTP_400_BAD_REQUEST)        
         # Remove webhook
         success, message = GitHubWebhookService.delete_webhook(github_repo, github_token)
         
@@ -497,14 +495,14 @@ def webhook_status(request, doc_id):
             }, status=status.HTTP_403_FORBIDDEN)
         
         try:
-            github_repo = GitHubRepository.objects.get(doc_folder=doc_folder)
+            github_repo = doc_folder.github_repo
             return Response({
                 'is_github_repo': True,
                 'webhook_active': github_repo.is_webhook_active,
                 'auto_sync_enabled': github_repo.auto_sync_enabled,
                 'last_sync_at': github_repo.last_sync_at,
                 'sync_failures': github_repo.sync_failures,
-                'last_error': github_repo.last_error_message,
+                'last_error': github_repo.last_sync_error,
                 'repo_url': github_repo.github_url
             })
         except GitHubRepository.DoesNotExist:
