@@ -146,28 +146,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 PUBLIC_DOCS_PATH = os.path.join(BASE_DIR, 'media', 'generated_docs', 'public_repo')
 
 #custom
-AI_MODEL = "gemini"
-AI_MODEL_NAME = "gemini-1.5-flash"
+AI_MODEL = "llama2:7b"
 
-
-AI_MODEL_DEPLOY_TYPE = "ollama"
-
+# AI Model Configuration
+AI_MODEL_API_ENDPOINT = "https://repo2doc-8080.zcodeusers.in/completion"
 
 OLLAMA_URL = "http://repo2doc-11434.zcodeusers.in"
 HOST_URL = "http://repo2doc-8000.zcodeusers.in"
 
-TEMPARATURE = 0.2
-MAX_TOKENS = 50  # 2048 (Max safe chunk)
+# Model parameters
+TEMPERATURE = 0.2
+MAX_TOKENS = 50
 
-
+# Model path
 LLAMA_CPP_PATH = "/home/workspace/llama.cpp/build/models/llama-2-7b.Q4_K_M.gguf"
 
 
-# Google GenAI API Key
-GOOGLE_GENAI_API_KEY = os.getenv('GOOGLE_GENAI_API_KEY', '')
+
 
 # Encryption key for storing GitHub tokens
-ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', 'your-default-key-here-must-be-32-chars!')
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')
 
 # Authentication settings
 AUTHENTICATION_BACKENDS = (
@@ -189,13 +187,28 @@ LOGOUT_REDIRECT_URL = '/'
 # Pagination settings
 PAGINATION_SIZE = 15
 
-# Enable debugging for social_auth
+# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'console_simple': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
     },
     'loggers': {
@@ -210,6 +223,41 @@ LOGGING = {
             'propagate': True,
         },
         'users': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'ai_model': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'repo2doc_api': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'dashboard': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'webhook': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'doc_view': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'organization': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'developer_console': {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,

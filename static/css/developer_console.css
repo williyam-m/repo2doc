@@ -219,8 +219,9 @@
 }
 
 .repo-link {
-    text-align: center;
+    text-align: right;
     margin-top: 8px;
+    margin-bottom: 5px;
 }
 
 .repo-link .white-button {

@@ -27,6 +27,7 @@ urlpatterns = [
     path('organization/', include('organization.urls')),
     path('webhook/', include('webhook.urls')),
     path('developer-console/', include('developer_console.urls', namespace='developer_console')),
+    path('ai_model/', include('ai_model.urls')),
     
     # API calls should point directly to the view for simplicity
     path('api/file-content/', include('doc_view.urls_api')),

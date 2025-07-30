@@ -1,0 +1,2 @@
+INFO 2025-07-30 13:29:19,425 autoreload Watching for file changes with StatReloader
+INFO 2025-07-30 13:29:35,733 autoreload /home/workspace/repo2doc/repo2doc/settings.py changed, reloading.
