@@ -1,0 +1,287 @@
+/* Developer Console Styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.developer-console-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+}
+
+.developer-console-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.console-description {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+/* Statistics Cards */
+.console-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.stat-card {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 15px;
+    width: calc(33.33% - 14px);
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #333;
+    transition: background-color 0.2s;
+}
+
+.stat-card:hover:after {
+    background-color: #555;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 3px;
+}
+
+.stat-label {
+    color: #aaa;
+    font-size: 0.85rem;
+}
+
+/* Repository Cards */
+.repos-section {
+    margin-top: 30px;
+}
+
+.repos-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.repos-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.repo-card {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 15px;
+    height: auto;
+    max-height: 150px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.repo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.repo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.repo-name {
+    font-weight: bold;
+    font-size: 1rem;
+    color: white;
+}
+
+.sync-status {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    display: inline-block;
+}
+
+.sync-enabled .status-dot {
+    background-color: #4caf50;
+}
+
+.sync-disabled .status-dot {
+    background-color: #757575;
+}
+
+/* Button styles */
+.white-button {
+    background-color: white;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-weight: 500;
+    height: 36px;
+    line-height: 20px;
+}
+
+.white-button:hover {
+    background-color: #e6e6e6;
+    transform: translateY(-1px);
+}
+
+.see-more-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.repo-meta {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 10px;
+    flex-grow: 1;
+}
+
+.repo-url, .repo-date, .repo-sync, .repo-error {
+    margin-bottom: 4px;
+}
+
+.repo-error {
+    color: #f44336;
+}
+
+/* Action Buttons */
+.repo-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.repo-actions .white-button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    height: 24px;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.repo-actions .white-button svg {
+    margin-right: 5px;
+    color: #333;
+}
+
+.repo-link {
+    text-align: center;
+    margin-top: 8px;
+}
+
+.repo-link .white-button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    width: auto;
+    min-width: 150px;
+    height: 24px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #aaa;
+}
+
+.empty-icon {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.empty-state h3 {
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+/* Pagination */
+.pagination {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 3px;
+    border-radius: 3px;
+}
+
+.pagination a {
+    background-color: white;
+    color: black;
+    text-decoration: none;
+    border: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.pagination a:hover {
+    background-color: #e6e6e6;
+}
+
+.pagination .current {
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+}

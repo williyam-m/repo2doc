@@ -12,16 +12,13 @@ from webhook.models import GitHubRepository
 def index(request):
     context = {}
     
-    # Get public doc folders for listing (limited for index page)
     public_doc_folders = GeneratedDocFolder.objects.filter(visibility='public').order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
     context['doc_folders'] = public_doc_folders
     context['public_doc_count'] = GeneratedDocFolder.objects.filter(visibility='public').count()
     
-    # Add user profile data and their docs if authenticated
     if request.user.is_authenticated:
         context['user_profile'] = request.user.profile
         
-        # Get user's docs for "My Repos" tab (limited for index page)
         my_doc_folders = GeneratedDocFolder.objects.filter(user=request.user).order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
         private_doc_folders = GeneratedDocFolder.objects.filter(user=request.user, visibility='private').order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
         
@@ -30,13 +27,11 @@ def index(request):
         context['my_doc_count'] = GeneratedDocFolder.objects.filter(user=request.user).count()
         context['private_doc_count'] = GeneratedDocFolder.objects.filter(user=request.user, visibility='private').count()
         
-        # Get organizations for dropdown
         user_orgs = Organization.objects.filter(
             members__user=request.user
         ).distinct()
         context['user_organizations'] = user_orgs
         
-        # Get organization repos (limited for index page)
         org_doc_folders = GeneratedDocFolder.objects.filter(
             organization__in=user_orgs
         ).order_by('-uploaded_at')[:settings.PAGINATION_SIZE]
@@ -51,70 +46,56 @@ def index(request):
         auto_sync = request.POST.get('auto_sync', 'disabled')
         github_token = None
         
-        # Get token from user profile if authenticated and auto_sync is enabled
         if auto_sync == 'enabled' and request.user.is_authenticated:
             try:
                 profile = request.user.profile
                 if profile.has_github_token():
                     github_token = profile.get_github_token()
                 else:
-                    # If auto-sync is requested but no token is stored, ask for it
                     github_token = request.POST.get('github_token', '').strip()
                     if github_token:
-                        # Store the token for future use
                         profile.set_github_token(github_token)
                         profile.save()
             except:
                 github_token = request.POST.get('github_token', '').strip()
         
-        # Initialize organization to None
         organization = None
         if organization_id and request.user.is_authenticated:
             try:
                 organization = Organization.objects.get(id=organization_id)
-                # Verify user is a member of this organization
                 if not OrganizationMember.objects.filter(organization=organization, user=request.user).exists():
                     organization = None
             except Organization.DoesNotExist:
                 organization = None
         
-        # Process GitHub URL if provided
         if github_url and github_url.startswith(('https://github.com/', 'http://github.com/')):
             try:
                 with tempfile.TemporaryDirectory() as temp_dir:
-                    # Extract owner and repo from URL
-                    # Format: https://github.com/owner/repo
                     parts = github_url.rstrip('/').split('/')
-                    if len(parts) >= 5:  # Protocol + empty + github.com + owner + repo
+                    if len(parts) >= 5:
                         owner = parts[-2]
                         repo = parts[-1]
                         
-                        # Get API URL to get the zip archive
                         zip_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/main.zip"
                         
-                        # Try to download the ZIP file
                         response = requests.get(zip_url, stream=True)
                         branch = 'main'
                         if response.status_code == 404:
-                            # Try master branch if main doesn't exist
                             zip_url = f"https://github.com/{owner}/{repo}/archive/refs/heads/master.zip"
                             response = requests.get(zip_url, stream=True)
                             branch = 'master'
                         
-                        # If still not found, try without branch specification (gets default branch)
                         if response.status_code == 404:
                             zip_url = f"https://api.github.com/repos/{owner}/{repo}/zipball"
                             response = requests.get(zip_url, stream=True)
                             branch = 'default'
                         
                         if response.status_code == 200:
-                            # Save zip file
                             zip_path = os.path.join(temp_dir, f"{repo}.zip")
                             with open(zip_path, 'wb') as f:
                                 for chunk in response.iter_content(chunk_size=8192):
                                     f.write(chunk)
                                     
-                            # Continue with zip file processing, passing GitHub info
                             return process_zip_file(request, zip_path, visibility, organization, context, 
                                                   github_info={'url': github_url, 'owner': owner, 'repo': repo, 'branch': branch})
                         else:
@@ -124,7 +105,6 @@ def index(request):
             except Exception as e:
                 context[API_KEY_NAME.ERROR] = f"Error processing GitHub URL: {str(e)}"                
         
-        # Process uploaded ZIP file
         elif uploaded_file and zipfile.is_zipfile(uploaded_file):
             with tempfile.TemporaryDirectory() as temp_zip_dir:
                 zip_path = os.path.join(temp_zip_dir, uploaded_file.name)
@@ -138,13 +118,10 @@ def index(request):
     return render(request, 'index.html', context)
 
 def process_zip_file(request, zip_path, visibility, organization, context, github_info=None):
-    """Process the zip file and generate documentation"""
     with tempfile.TemporaryDirectory() as temp_dir:
-        # Extract filename from the zip path
         zip_filename = os.path.basename(zip_path)
         zip_name = os.path.splitext(zip_filename)[0]
         
-        # Extract to a subdirectory to avoid processing the original zip
         extract_dir = os.path.join(temp_dir, 'extracted')
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_dir)
@@ -152,10 +129,8 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
         docs_output_root = os.path.join(settings.PUBLIC_DOCS_PATH, zip_name)
         os.makedirs(docs_output_root, exist_ok=True)
 
-        # Walk only the extracted directory, not the temp directory containing the zip file
         for root, dirs, files in os.walk(extract_dir):
             for file in files:
-                # Skip system/metadata files and zip files
                 if file.startswith('.') or '__MACOSX' in root or file.endswith('.zip'):
                     continue
 
@@ -167,12 +142,11 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
                     with open(abs_path, 'r', encoding='utf-8', errors='ignore') as source_file:
                         code = source_file.read()
                 except Exception:
-                    continue  # skip binary/non-readable
-
-                if not code.strip():  # skip empty files
                     continue
 
-                # Send to model
+                if not code.strip():
+                    continue
+
                 api_url = settings.HOST_URL + "/api/repo2doc/"
                 res = requests.post(api_url, json={API_KEY_NAME.CODE: code})
 
@@ -186,10 +160,8 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
                     with open(md_path, 'w', encoding='utf-8') as doc_file:
                         doc_file.write(documentation)
 
-        # Determine source type
         source_type = 'github' if github_info else 'upload'
 
-        # Save folder path to DB with user if authenticated
         if request.user.is_authenticated:
             doc_folder = GeneratedDocFolder.objects.create(
                 folder_path=docs_output_root, 
@@ -199,14 +171,12 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
                 source_type=source_type
             )
         else:
-            # Anonymous users can only create public docs
             doc_folder = GeneratedDocFolder.objects.create(
                 folder_path=docs_output_root,
                 visibility='public',
                 source_type=source_type
             )
 
-        # Create GitHub repository record if this was from GitHub
         if github_info and request.user.is_authenticated:
             github_repo = GitHubRepository.objects.create(
                 doc_folder=doc_folder,
@@ -214,10 +184,9 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
                 owner=github_info['owner'],
                 repo_name=github_info['repo'],
                 branch=github_info['branch'],
-                auto_sync_enabled=False  # Default to disabled, user can enable later
+                auto_sync_enabled=False
             )
             
-            # If auto_sync was requested and we have a token, set it up
             auto_sync_requested = request.POST.get('auto_sync', 'disabled') == 'enabled'
             github_token = request.POST.get('github_token', '').strip()
             
@@ -232,7 +201,6 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
                     )
                     if success:
                         context['auto_sync_message'] = 'Auto-sync enabled successfully!'
-                        # Store the token for future use
                         if request.user.is_authenticated:
                             try:
                                 profile = request.user.profile
@@ -249,7 +217,6 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
 
         context[API_KEY_NAME.MESSAGE] = SuccessMessages.DOCUMENTATION_GENERATED
         
-        # Get updated list of folders
         if request.user.is_authenticated:
             my_doc_folders = GeneratedDocFolder.objects.filter(user=request.user).order_by('-uploaded_at')
             context['my_doc_folders'] = my_doc_folders
@@ -257,7 +224,6 @@ def process_zip_file(request, zip_path, visibility, organization, context, githu
         public_doc_folders = GeneratedDocFolder.objects.filter(visibility='public').order_by('-uploaded_at')
         context['doc_folders'] = public_doc_folders
         
-        # Store the ID of the newly created doc for the view link
         context['latest_doc_id'] = doc_folder.id
         
     return render(request, 'index.html', context)

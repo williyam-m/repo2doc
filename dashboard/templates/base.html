@@ -18,7 +18,7 @@
         </div>
         <div class="auth-buttons">
             {% if user.is_authenticated %}
-                <a href="{% url 'profile' %}" class="user-profile">
+                <a href="{% url 'user_profile' user.username %}" class="user-profile">
                     {% if user.profile.avatar_url %}
                         <img src="{{ user.profile.avatar_url }}" alt="{{ user.username }}" class="user-avatar">
                     {% endif %}

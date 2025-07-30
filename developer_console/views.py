@@ -20,8 +20,13 @@ def dashboard(request):
         source_type='github'
     ).select_related('github_repo').order_by('-uploaded_at')
     
+    # Add pagination for GitHub repositories
+    paginator = Paginator(github_repos, 15)  # Use pagination size from settings
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     # Add sync status to each repository
-    for repo in github_repos:
+    for repo in page_obj:
         try:
             github_repo = repo.github_repo
             repo.is_sync_enabled = github_repo.auto_sync_enabled
@@ -30,14 +35,15 @@ def dashboard(request):
             repo.sync_error = github_repo.last_sync_error
         except:
             repo.is_sync_enabled = False
-            repo.sync_status = 'not_configured'
+            repo.sync_status = 'disabled'  # Changed from 'not_configured' to 'disabled'
             repo.last_sync = None
             repo.sync_error = None
     
     context = {
-        'github_repos': github_repos,
+        'github_repos': page_obj,
+        'page_obj': page_obj,
         'total_repos': github_repos.count(),
-        'enabled_repos': sum(1 for repo in github_repos if getattr(repo, 'is_sync_enabled', False)),
+        'enabled_repos': sum(1 for repo in github_repos if hasattr(repo, 'github_repo') and repo.github_repo.auto_sync_enabled),
     }
     
     return render(request, 'developer_console/dashboard.html', context)
@@ -167,21 +173,20 @@ def test_webhook(request, doc_id):
         if not github_repo.auto_sync_enabled:
             return JsonResponse({'success': False, 'message': 'Auto-sync is not enabled'})
         
-        # Test webhook connection by pinging GitHub API
+        # Get user's GitHub token
         user_profile = getattr(request.user, 'profile', None)
         if not user_profile or not user_profile.has_github_token():
             return JsonResponse({'success': False, 'message': 'GitHub token not found'})
         
         github_token = user_profile.get_github_token()
-        service = GitHubWebhookService()
+        if not github_token:
+            return JsonResponse({'success': False, 'message': 'Invalid GitHub token'})
         
-        # Test the connection by checking if the webhook exists
+        # Test webhook connection
+        service = GitHubWebhookService()
         success, message = service.test_webhook_connection(github_repo, github_token)
         
-        return JsonResponse({
-            'success': success, 
-            'message': message
-        })
+        return JsonResponse({'success': success, 'message': message})
         
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)})

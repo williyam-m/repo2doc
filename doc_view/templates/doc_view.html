@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!DOCTYPE html>
-<html lang="en">
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Repo2Doc - Documentation View</title>
@@ -15,15 +12,12 @@
 </head>
 <body>
   <div class="doc-view-container">
-    <!-- Folder Tree (Left) - Resizable -->
     <div class="folder-tree" id="folder-tree">
       <h3>Project Structure</h3>
       <div id="folder-structure">
         <div id="tree-root"></div>
       </div>
     </div>
-
-<!-- Documentation Content (Center) -->
     <div class="doc-content">
       <div class="doc-header">
         <h2>{{ doc_folder.folder_name }}</h2>
@@ -35,7 +29,7 @@
               <circle cx="12" cy="12" r="3"></circle>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
-            Auto-Sync Settings
+            Settings
           </a>
           <a href="{% url 'developer_console:log_view' doc_folder.id %}" class="header-action-btn logs-btn">
             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
@@ -68,7 +62,6 @@
         {% endif %}
       </div>
     </div>
-    <!-- Chat Container (Right) - Resizable -->
     <div class="chat-container" id="chat-container">
       <div class="chat-toggle" onclick="toggleChat()">
         Chat
@@ -80,7 +73,6 @@
           <button class="chat-close" onclick="toggleChat()">×</button>
         </div>
         <div class="chat-messages" id="chat-messages">
-          <!-- Messages will be inserted here dynamically -->
         </div>
         <div class="chat-input">
           <div class="current-file-label">Current file: <span id="current-file-name">{{ current_file_name|default:"No file selected" }}</span></div>
@@ -98,7 +90,6 @@
     const docId = {{ doc_folder.id }};
     const fileTree = {{ file_tree_json|safe }};
 
-    // Function to build tree structure
     function buildTree(items, container, level = 0) {
       items.forEach(item => {
         const treeItem = document.createElement('div');
@@ -131,7 +122,6 @@
       });
     }
 
-    // Function to toggle folder expansion
     function toggleFolder(folderElement, children) {
       const toggle = folderElement.querySelector('.folder-toggle');
       const childContainer = folderElement.nextElementSibling;
@@ -145,7 +135,6 @@
       }
     }
 
-    // Function to expand folder to specified level
     function expandFolderToLevel(container, maxLevel, currentLevel = 0) {
       if (currentLevel >= maxLevel) return;
       
@@ -162,12 +151,9 @@
       });
     }
 
-    // Function to load file content
     function loadFile(path, fileName) {
       const apiUrl = `/doc_view/api/file-content/?path=${encodeURIComponent(path)}&doc_id=${docId}`;
-      console.log('Loading file from URL:', apiUrl);
       
-      // Use absolute URL to avoid path resolution issues
       const absoluteUrl = new URL(apiUrl, window.location.origin).href;
       fetch(absoluteUrl)
         .then(response => {
@@ -177,19 +163,15 @@
           return response.json();
         })
         .then(data => {
-          // Parse markdown and render as HTML
           const htmlContent = marked.parse(data.raw_content || '');
           document.getElementById('markdown-content').innerHTML = htmlContent;
           
-          // Update current file info
           currentFilePath = path;
           currentFileContent = data.raw_content || '';
           document.getElementById('current-file-name').textContent = fileName;
           
-          // Enable send button
           document.getElementById('send-button').disabled = false;
           
-          // Update active file in tree
           document.querySelectorAll('.tree-item').forEach(item => {
             item.classList.remove('active');
           });
@@ -199,12 +181,10 @@
           }
         })
         .catch(error => {
-          console.error('Error loading file:', error);
           document.getElementById('markdown-content').innerHTML = '<p>Error loading file content.</p>';
         });
     }
 
-    // Function to toggle chat window
     function toggleChat() {
       const chatContainer = document.getElementById('chat-container');
       
@@ -215,37 +195,30 @@
       }
     }
 
-    // Function to send chat message
     function sendMessage() {
       const input = document.getElementById('chat-input');
       const message = input.value.trim();
       
       if (!message || !currentFilePath) return;
       
-      // Disable send button temporarily
       document.getElementById('send-button').disabled = true;
       
-      // Clear input
       input.value = '';
       
-      // Add user message to chat
       const chatMessages = document.getElementById('chat-messages');
       const userMessageDiv = document.createElement('div');
       userMessageDiv.className = 'message user-message';
       userMessageDiv.textContent = message;
       chatMessages.appendChild(userMessageDiv);
       
-      // Scroll to bottom of chat
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // Add loading message
       const loadingDiv = document.createElement('div');
       loadingDiv.className = 'message ai-message loading';
       loadingDiv.textContent = 'Thinking...';
       chatMessages.appendChild(loadingDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
       
-      // Send to chat API
       fetch('/chat/api/', {
         method: 'POST',
         headers: {
@@ -260,25 +233,18 @@
       })
       .then(response => response.json())
       .then(data => {
-        // Remove loading message
         loadingDiv.remove();
         
-        // Add AI response
         const aiMessageDiv = document.createElement('div');
         aiMessageDiv.className = 'message ai-message';
         aiMessageDiv.textContent = data.response || 'Sorry, I could not process your request.';
         chatMessages.appendChild(aiMessageDiv);
         
-        // Scroll to bottom of chat
         chatMessages.scrollTop = chatMessages.scrollHeight;
       })
       .catch(error => {
-        console.error('Error sending message:', error);
-        
-        // Remove loading message
         loadingDiv.remove();
         
-        // Show error message
         const errorDiv = document.createElement('div');
         errorDiv.className = 'message ai-message error';
         errorDiv.textContent = 'Error: Could not send message. Please try again.';
@@ -286,12 +252,10 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       })
       .finally(() => {
-        // Re-enable send button
         document.getElementById('send-button').disabled = false;
       });
     }
 
-    // Function to get CSRF token
     function getCookie(name) {
       let cookieValue = null;
       if (document.cookie && document.cookie !== '') {
@@ -307,7 +271,6 @@
       return cookieValue;
     }
 
-    // Find first file in tree
     function findFirstFile(items) {
       for (let item of items) {
         if (!item.is_dir) {
@@ -320,9 +283,7 @@
       return null;
     }
 
-    // Make elements resizable
     function initResizable() {
-      // Left sidebar resize
       const folderTree = document.getElementById('folder-tree');
       let isResizingTree = false;
       let lastX = 0;
@@ -342,7 +303,6 @@
         document.body.style.cursor = '';
       });
       
-      // Create and add resize handle for folder tree
       const treeResizeHandle = document.createElement('div');
       treeResizeHandle.className = 'resize-handle tree-resize-handle';
       treeResizeHandle.style.position = 'absolute';
@@ -363,22 +323,17 @@
       });
     }
 
-    // Initialize page
     document.addEventListener('DOMContentLoaded', function() {
-      // Build tree structure
       const treeRoot = document.getElementById('tree-root');
       buildTree(fileTree, treeRoot);
       
-      // Expand folders to level 3 by default
       expandFolderToLevel(treeRoot, 3);
       
-      // Load first file by default
       const firstFile = findFirstFile(fileTree);
       if (firstFile) {
         loadFile(firstFile.path, firstFile.name);
       }
       
-      // Add keyboard shortcut for sending messages
       document.getElementById('chat-input').addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
@@ -386,38 +341,6 @@
         }
       });
 
-      // Initialize resizable panels
-      initResizable();
-    });
-  </script>
-</body>
-</html>      });
-    }
-
-    // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
-      // Build tree structure
-      const treeRoot = document.getElementById('tree-root');
-      buildTree(fileTree, treeRoot);
-      
-      // Expand folders to level 3 by default
-      expandFolderToLevel(treeRoot, 3);
-      
-      // Load first file by default
-      const firstFile = findFirstFile(fileTree);
-      if (firstFile) {
-        loadFile(firstFile.path, firstFile.name);
-      }
-      
-      // Add keyboard shortcut for sending messages
-      document.getElementById('chat-input').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-
-      // Initialize resizable panels
       initResizable();
     });
   </script>

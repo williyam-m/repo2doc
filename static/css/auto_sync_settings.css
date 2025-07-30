@@ -1,0 +1,415 @@
+/* Auto Sync Settings Styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.settings-header {
+    margin-bottom: 30px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.breadcrumb a {
+    color: #ccc;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.settings-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.settings-description {
+    color: #aaa;
+    font-size: 1rem;
+}
+
+.messages {
+    margin-bottom: 20px;
+}
+
+.message {
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.message-success {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 4px solid #4caf50;
+    color: #4caf50;
+}
+
+.message-error {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 4px solid #f44336;
+    color: #f44336;
+}
+
+.settings-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 992px) {
+    .settings-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+.repo-info {
+    background-color: #1a1a1a;
+    border-radius: 6px;
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+.repo-details h3, .sync-status-card h4 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.detail-item {
+    display: flex;
+    margin-bottom: 12px;
+}
+
+.detail-label {
+    font-weight: bold;
+    width: 120px;
+    color: #aaa;
+}
+
+.detail-value {
+    flex: 1;
+    color: white;
+}
+
+.detail-value a {
+    color: #4fc3f7;
+    text-decoration: none;
+}
+
+.detail-value a:hover {
+    text-decoration: underline;
+}
+
+.sync-status-card {
+    margin-top: 30px;
+    background-color: #1f1f1f;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.status-indicator {
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.status-enabled {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.status-disabled {
+    background-color: rgba(158, 158, 158, 0.1);
+    color: #9e9e9e;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-enabled .status-dot {
+    background-color: #4caf50;
+}
+
+.status-disabled .status-dot {
+    background-color: #9e9e9e;
+}
+
+.sync-error {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 15px;
+}
+
+.sync-error h5 {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #f44336;
+}
+
+.sync-error p {
+    font-size: 0.85rem;
+    color: #f44336;
+    margin: 0;
+}
+
+.sync-controls {
+    background-color: #1a1a1a;
+    border-radius: 6px;
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+.control-section {
+    margin-bottom: 30px;
+}
+
+.control-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.control-section p {
+    color: #aaa;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.sync-form {
+    margin-bottom: 20px;
+}
+
+.token-info {
+    margin-bottom: 20px;
+}
+
+.info-box {
+    background-color: #202020;
+    border-radius: 4px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.primary-btn, .secondary-btn, .danger-btn, .white-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    text-decoration: none;
+    height: 36px;
+    transition: all 0.2s;
+}
+
+.primary-btn {
+    background-color: #4caf50;
+    color: white;
+}
+
+.primary-btn:hover {
+    background-color: #388e3c;
+}
+
+.secondary-btn {
+    background-color: #424242;
+    color: white;
+    border: 1px solid #555;
+}
+
+.secondary-btn:hover {
+    background-color: #505050;
+}
+
+.danger-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.danger-btn:hover {
+    background-color: #d32f2f;
+}
+
+.white-button {
+    background-color: white;
+    color: black;
+}
+
+.white-button:hover {
+    background-color: #e0e0e0;
+}
+
+.profile-link {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.profile-link a {
+    color: #4fc3f7;
+    text-decoration: none;
+}
+
+.profile-link a:hover {
+    text-decoration: underline;
+}
+
+.no-token-section {
+    margin-bottom: 30px;
+}
+
+.warning-box {
+    background-color: rgba(255, 152, 0, 0.1);
+    border-radius: 4px;
+    padding: 15px;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #ff9800;
+}
+
+.warning-box svg {
+    color: #ff9800;
+    flex-shrink: 0;
+}
+
+.warning-box h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: white;
+}
+
+.warning-box p {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin: 0;
+}
+
+.action-buttons-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.token-requirements {
+    background-color: #202020;
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.token-requirements h5 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.token-requirements ul {
+    padding-left: 20px;
+    margin: 0;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.token-requirements li {
+    margin-bottom: 5px;
+}
+
+.token-requirements li strong {
+    color: #4fc3f7;
+}
+
+.test-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+}
+
+.test-section h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.test-section p {
+    color: #aaa;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.test-result {
+    margin-top: 15px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.test-result.success {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.test-result.error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+.info-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+}
+
+.info-section h4 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.info-section ul {
+    padding-left: 20px;
+    margin: 0;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.info-section li {
+    margin-bottom: 8px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
