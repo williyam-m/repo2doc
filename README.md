@@ -37,6 +37,8 @@ Frontend: HTML5, CSS3, JavaScript (Vanilla)
 
 ### System Architecture
 
+![repo2doc Architecture](static/media/repo2doc-architecture.png)
+
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Client Web    │    │   Django API     │    │   AI Engine     │
