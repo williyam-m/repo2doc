@@ -10,6 +10,10 @@
 
 repo2doc is an intelligent documentation generation platform that transforms any code repository into comprehensive, AI-generated documentation. Whether you upload a ZIP file or provide a GitHub URL, our system automatically analyzes your codebase and creates detailed markdown documentation with smart insights.
 
+## DEMO
+![repo2doc DEMO](static/app_media/repo2doc-demo.mov)
+
+
 ## ✨ Key Features
 
 - **Multi-Input Support**: Upload ZIP files or provide GitHub repository URLs
@@ -35,9 +39,9 @@ Webhooks: GitHub Webhook API
 Frontend: HTML5, CSS3, JavaScript (Vanilla)
 ```
 
-### System Architecture
+## System Architecture
 
-![repo2doc Architecture](static/media/repo2doc-architecture.png)
+![repo2doc Architecture](static/app_media/repo2doc-architecture.png)
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
