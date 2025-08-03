@@ -320,11 +320,164 @@
     </div>
   </div>
 
+  <!-- App Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title">Why Choose Repo2Doc?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Lightning Fast</h3>
+          <p>Generate comprehensive documentation in seconds using advanced AI models</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>Auto-Sync</h3>
+          <p>Keep documentation updated automatically with GitHub webhooks on every commit</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>GitHub Integration</h3>
+          <p>Support for both ZIP uploads and direct GitHub repository URLs</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Team Collaboration</h3>
+          <p>Share documentation across organizations with role-based access control</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h3>AI Chat Assistant</h3>
+          <p>Interactive chat to answer questions about your codebase in real-time</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Developer Console</h3>
+          <p>Monitor sync status, view logs, and manage documentation settings</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works-section">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps-container">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Upload or Connect</h3>
+            <p>Upload your repository ZIP file or connect directly via GitHub URL</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>AI Analysis</h3>
+            <p>Our AI models analyze your code structure, functions, and dependencies</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Generate Docs</h3>
+            <p>Comprehensive markdown documentation is generated automatically</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Stay Synced</h3>
+            <p>Set up auto-sync to keep documentation updated with code changes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Workflow Section -->
+  <section class="technical-workflow-section">
+    <div class="container">
+      <h2 class="section-title">Technical Workflow</h2>
+      <div class="workflow-content">
+        <div class="workflow-text">
+          <h3>Powered by Advanced AI Technology</h3>
+          <p>Repo2Doc leverages cutting-edge language models to understand your code and generate meaningful documentation:</p>
+          <ul class="workflow-features">
+            <li><strong>Repository Processing:</strong> Intelligent code parsing and structure analysis</li>
+            <li><strong>AI Generation:</strong> Context-aware documentation using Llama 2 7B model</li>
+            <li><strong>GitHub Webhooks:</strong> Real-time synchronization on repository changes</li>
+            <li><strong>Multi-format Support:</strong> Works with all major programming languages</li>
+            <li><strong>Interactive Chat:</strong> AI-powered Q&A about your codebase</li>
+          </ul>
+        </div>
+        <div class="workflow-diagram">
+          <div class="workflow-box">📁 Repository</div>
+          <div class="workflow-arrow">↓</div>
+          <div class="workflow-box">🤖 AI Analysis</div>
+          <div class="workflow-arrow">↓</div>
+          <div class="workflow-box">📝 Documentation</div>
+          <div class="workflow-arrow">↓</div>
+          <div class="workflow-box">🔄 Auto-Sync</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 {% if latest_doc_id %}
   <input type="hidden" id="latest-doc-id" value="{{ latest_doc_id }}">
 {% endif %}
 
 {% endblock %}
+
+<!-- Footer Section -->
+<footer class="main-footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Repo2Doc</h3>
+        <p>AI-powered repository-to-documentation generator with quick code insights.</p>
+        <p class="footer-tagline">"Future developers will still need documentation, but from now on, it's AI-powered."</p>
+      </div>
+      <div class="footer-section">
+        <h4>Features</h4>
+        <ul>
+          <li>AI Documentation Generation</li>
+          <li>GitHub Auto-Sync</li>
+          <li>Team Collaboration</li>
+          <li>Interactive Chat</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="{% url 'developer_console:dashboard' %}">Developer Console</a></li>
+          <li><a href="{% url 'organization_list' %}">Organizations</a></li>
+          <li><a href="https://github.com/williyam-m/repo2doc" target="_blank" rel="noopener">GitHub Repository</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Connect</h4>
+        <div class="github-link">
+          <a href="https://github.com/williyam-m/repo2doc" target="_blank" rel="noopener" class="github-footer-link">
+            <svg class="github-icon" viewBox="0 0 24 24" fill="white">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+            View on GitHub
+          </a>
+        </div>
+        <p class="open-source">Open Source • MIT License</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Repo2Doc. Built with ❤️ for developers everywhere.</p>
+    </div>
+  </div>
+</footer>
 
 {% block extra_js %}
 <script src="{% static 'js/index.js' %}"></script>

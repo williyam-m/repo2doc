@@ -1200,6 +1200,343 @@ select#organization-select {
     text-align: center;
 }
 
+/* New sections styles */
+
+/* Features Section */
+.features-section {
+    background-color: #0a0a0a;
+    padding: 60px 0;
+    margin: 60px 0;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 40px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.feature-card {
+    background-color: #111111;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 25px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: #666666;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.feature-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.feature-card p {
+    color: #aaaaaa;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+/* How It Works Section */
+.how-it-works-section {
+    padding: 60px 0;
+    margin: 60px 0;
+}
+
+.steps-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.step {
+    background-color: #111111;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    min-width: 180px;
+    flex: 1;
+    max-width: 220px;
+    transition: all 0.3s ease;
+}
+
+.step:hover {
+    transform: translateY(-5px);
+    border-color: #666666;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.step-number {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 50%;
+    line-height: 40px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.step-content h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.step-content p {
+    color: #aaaaaa;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.step-arrow {
+    font-size: 1.5rem;
+    color: #666666;
+    margin: 0 10px;
+}
+
+/* Technical Workflow Section */
+.technical-workflow-section {
+    background-color: #0a0a0a;
+    padding: 60px 0;
+    margin: 60px 0;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+.workflow-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.workflow-text h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-align: left;
+}
+
+.workflow-text p {
+    color: #aaaaaa;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.workflow-features {
+    list-style: none;
+    padding: 0;
+}
+
+.workflow-features li {
+    color: #aaaaaa;
+    margin-bottom: 12px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+}
+
+.workflow-features li::before {
+    content: "▶";
+    position: absolute;
+    left: 0;
+    color: #ffffff;
+    font-size: 0.8rem;
+}
+
+.workflow-features strong {
+    color: #ffffff;
+}
+
+.workflow-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.workflow-box {
+    background-color: #111111;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 15px 20px;
+    text-align: center;
+    min-width: 140px;
+    color: #ffffff;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.workflow-box:hover {
+    border-color: #666666;
+    transform: scale(1.05);
+}
+
+.workflow-arrow {
+    font-size: 1.5rem;
+    color: #666666;
+}
+
+/* Footer Styles */
+.main-footer {
+    background-color: #0a0a0a;
+    border-top: 1px solid #333;
+    padding: 40px 0 20px;
+    margin-top: 80px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.footer-section h3 {
+    font-size: 1.3rem;
+}
+
+.footer-section h4 {
+    font-size: 1rem;
+}
+
+.footer-section p {
+    color: #aaaaaa;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.footer-tagline {
+    font-style: italic;
+    color: #cccccc !important;
+    font-size: 0.9rem;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    color: #aaaaaa;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-section ul li a:hover {
+    color: #ffffff;
+}
+
+.github-footer-link {
+    display: inline-flex;
+    align-items: center;
+    background-color: #333333;
+    color: #ffffff;
+    padding: 8px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s;
+    margin-bottom: 10px;
+}
+
+.github-footer-link:hover {
+    background-color: #444444;
+    transform: translateY(-2px);
+}
+
+.github-footer-link .github-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+.open-source {
+    color: #aaaaaa;
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    color: #aaaaaa;
+    font-size: 0.9rem;
+}
+
+/* Responsive design for new sections */
+@media (max-width: 768px) {
+    .steps-container {
+        flex-direction: column;
+    }
+    
+    .step-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+    
+    .workflow-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .workflow-diagram {
+        order: -1;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+}
+
 /* Responsive design */
 @media (max-width: 992px) {
     .doc-view-container {
@@ -1233,5 +1570,10 @@ select#organization-select {
     
     .container {
         padding: 10px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
     }
 }
